@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Land — Automation Setup Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-page:      #15182f;
+      --color-surface-1: #181b38;
+      --color-surface-2: #1c2146;
+      --color-surface-3: #25295d;
+      --color-surface-4: #272b66;
+      --color-surface-5: #4f548e;
+      --color-code-bg:   #0d0f1e;
+
+      --color-accent:       #c9e75d;
+      --color-accent-hover: #e3ff7c;
+      --color-accent-dim:   rgba(201,231,93,0.12);
+      --color-accent-dim2:  rgba(201,231,93,0.06);
+
+      --color-text-1: #fafafa;
+      --color-text-2: #e0ddeb;
+      --color-text-3: #b1b1d3;
+      --color-text-4: #7676a1;
+      --color-text-dark: #121312;
+
+      --color-success: #0fd79c;
+      --color-error:   #f65959;
+
+      --color-divider: rgba(255,255,255,0.06);
+
+      --radius-sm:   4px;
+      --radius-md:   8px;
+      --radius-lg:   12px;
+      --radius-xl:   16px;
+      --radius-full: 9999px;
+
+      --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,0.4);
+
+      --sidebar-width: 240px;
+      --duration-fast: 150ms;
+      --duration-base: 200ms;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Exo 2', system-ui, sans-serif;
+      font-size: 15px;
+      color: var(--color-text-1);
+      background: var(--color-page);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    * { scrollbar-width: thin; scrollbar-color: var(--color-surface-3) transparent; }
+    *::-webkit-scrollbar { width: 4px; }
+    *::-webkit-scrollbar-track { background: transparent; }
+    *::-webkit-scrollbar-thumb { background: var(--color-surface-3); border-radius: 2px; }
+
+    ::selection { background: rgba(201,231,93,0.25); color: #fafafa; }
+
+    /* ── Particle bg ── */
+    #particles {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,0.08) 0%, transparent 70%);
+    }
+
+    /* ── Navbar ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px;
+      background: rgba(21,24,47,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--color-divider);
+      display: flex; align-items: center; gap: 16px;
+      padding: 0 24px;
+    }
+    .nav-logo {
+      font-weight: 800; font-size: 18px; color: var(--color-accent);
+      text-decoration: none; letter-spacing: -0.5px;
+    }
+    .nav-title {
+      font-size: 13px; color: var(--color-text-4); font-weight: 500;
+    }
+    .nav-title span { color: var(--color-text-3); }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      padding-top: 56px;
+      min-height: 100vh;
+      position: relative; z-index: 1;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      width: var(--sidebar-width);
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+      padding: 32px 0;
+      border-right: 1px solid var(--color-divider);
+      background: var(--color-surface-1);
+    }
+    .sidebar-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--color-text-4);
+      padding: 0 20px 12px;
+    }
+    .sidebar-step {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background var(--duration-fast);
+      border-left: 2px solid transparent;
+    }
+    .sidebar-step:hover { background: var(--color-accent-dim2); }
+    .sidebar-step.active {
+      background: var(--color-accent-dim);
+      border-left-color: var(--color-accent);
+    }
+    .sidebar-step.done .step-num {
+      background: var(--color-success);
+      color: var(--color-text-dark);
+    }
+    .sidebar-step.done .step-num::after {
+      content: '✓'; font-size: 10px;
+    }
+    .sidebar-step:not(.done) .step-num-text { display: inline; }
+    .sidebar-step.done .step-num-text { display: none; }
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--color-surface-3);
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background var(--duration-base), color var(--duration-base);
+    }
+    .sidebar-step.active .step-num {
+      background: var(--color-accent);
+      color: var(--color-text-dark);
+    }
+    .step-nav-name {
+      font-size: 12px; font-weight: 500;
+      color: var(--color-text-3);
+      line-height: 1.3;
+    }
+    .sidebar-step.active .step-nav-name { color: var(--color-text-1); }
+
+    .sidebar-footer {
+      padding: 20px 20px 0;
+      margin-top: 16px;
+      border-top: 1px solid var(--color-divider);
+    }
+    .sidebar-cost {
+      font-size: 11px; color: var(--color-text-4); line-height: 1.6;
+    }
+    .sidebar-cost strong { color: var(--color-accent); }
+
+    /* ── Main ── */
+    .main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 48px 48px 120px;
+      max-width: calc(var(--sidebar-width) + 820px);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      margin-bottom: 56px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--color-accent-dim);
+      border: 1px solid rgba(201,231,93,0.2);
+      border-radius: var(--radius-full);
+      padding: 4px 12px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+      color: var(--color-accent);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: 40px; font-weight: 800; line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .hero h1 span { color: var(--color-accent); }
+    .hero-sub {
+      font-size: 17px; color: var(--color-text-3); line-height: 1.6;
+      max-width: 560px;
+    }
+
+    /* Progress pills */
+    .progress-pills {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-top: 28px;
+    }
+    .progress-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--color-surface-1);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-full);
+      padding: 5px 12px;
+      font-size: 12px; color: var(--color-text-4);
+      cursor: pointer; transition: all var(--duration-fast);
+    }
+    .progress-pill.done {
+      border-color: rgba(15,215,156,0.3);
+      color: var(--color-success);
+    }
+    .progress-pill .pill-num {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--color-surface-3);
+      font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .progress-pill.done .pill-num { background: var(--color-success); color: #000; }
+
+    /* ── Step Card ── */
+    .step-card {
+      background: var(--color-surface-1);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-xl);
+      margin-bottom: 24px;
+      overflow: hidden;
+      scroll-margin-top: 80px;
+    }
+    .step-card:hover {
+      border-color: rgba(201,231,93,0.12);
+    }
+    .step-header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 24px 28px;
+      background: var(--color-surface-2);
+      border-bottom: 1px solid var(--color-divider);
+    }
+    .step-number {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--color-surface-3);
+      border: 2px solid var(--color-surface-5);
+      font-size: 18px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--color-accent);
+    }
+    .step-icon { font-size: 24px; flex-shrink: 0; }
+    .step-meta { flex: 1; }
+    .step-meta h2 {
+      font-size: 20px; font-weight: 700; line-height: 1.2;
+      margin-bottom: 2px;
+    }
+    .step-meta p {
+      font-size: 13px; color: var(--color-text-4);
+    }
+    .step-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--color-accent);
+      color: var(--color-text-dark);
+      font-weight: 700; font-size: 12px;
+      padding: 8px 14px; border-radius: var(--radius-md);
+      text-decoration: none;
+      flex-shrink: 0;
+      transition: background var(--duration-fast);
+    }
+    .step-link:hover { background: var(--color-accent-hover); }
+    .step-link-ghost {
+      background: transparent;
+      border: 1px solid rgba(201,231,93,0.3);
+      color: var(--color-accent);
+      margin-left: 8px;
+    }
+    .step-link-ghost:hover { background: var(--color-accent-dim); }
+
+    .step-body { padding: 24px 28px; }
+
+    /* Sub-step */
+    .substep {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--color-divider);
+    }
+    .substep:last-child { border-bottom: none; padding-bottom: 0; }
+    .substep:first-child { padding-top: 0; }
+    .substep-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--color-surface-3);
+      font-size: 11px; font-weight: 700; color: var(--color-text-3);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .substep-content { flex: 1; }
+    .substep-title {
+      font-size: 14px; font-weight: 600; color: var(--color-text-1);
+      margin-bottom: 4px;
+    }
+    .substep-desc {
+      font-size: 13px; color: var(--color-text-3); line-height: 1.5;
+    }
+    .substep-desc a {
+      color: var(--color-accent); text-decoration: none;
+    }
+    .substep-desc a:hover { text-decoration: underline; }
+
+    /* Save box */
+    .save-box {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--color-accent-dim2);
+      border: 1px solid rgba(201,231,93,0.15);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      margin-top: 10px;
+    }
+    .save-box-icon { font-size: 16px; }
+    .save-box-text {
+      font-size: 12px; color: var(--color-text-3); line-height: 1.4;
+    }
+    .save-box-text strong { color: var(--color-accent); font-weight: 600; }
+
+    /* Code block */
+    .code-wrap {
+      position: relative;
+      margin-top: 10px;
+    }
+    .code-block {
+      background: var(--color-code-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; line-height: 1.6;
+      color: var(--color-text-2);
+    }
+    .code-block .cmd { color: #79c0ff; }
+    .code-block .comment { color: var(--color-text-4); font-style: italic; }
+    .code-block .str { color: #a5d6ff; }
+    .code-block .kw { color: var(--color-accent); font-weight: 600; }
+    .copy-btn {
+      position: absolute; top: 8px; right: 8px;
+      background: var(--color-surface-3);
+      border: none; color: var(--color-text-3);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 11px; font-weight: 600;
+      padding: 4px 10px; border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .copy-btn:hover { background: var(--color-surface-4); color: var(--color-text-1); }
+    .copy-btn.copied { background: var(--color-success); color: #000; }
+
+    /* Tip box */
+    .tip-box {
+      display: flex; gap: 12px; align-items: flex-start;
+      background: rgba(15,215,156,0.06);
+      border: 1px solid rgba(15,215,156,0.2);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-top: 16px;
+    }
+    .tip-box.warn {
+      background: rgba(236,169,17,0.06);
+      border-color: rgba(236,169,17,0.2);
+    }
+    .tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .tip-text { font-size: 13px; color: var(--color-text-3); line-height: 1.5; }
+    .tip-text strong { color: var(--color-text-1); }
+
+    /* ── Final Claude prompt section ── */
+    .prompt-section {
+      background: linear-gradient(135deg, rgba(201,231,93,0.04) 0%, rgba(99,102,241,0.04) 100%);
+      border: 1px solid rgba(201,231,93,0.2);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      margin-top: 16px;
+      scroll-margin-top: 80px;
+    }
+    .prompt-header {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 24px;
+    }
+    .prompt-icon {
+      width: 52px; height: 52px;
+      background: var(--color-accent);
+      border-radius: var(--radius-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    .prompt-meta h2 {
+      font-size: 22px; font-weight: 800; margin-bottom: 4px;
+    }
+    .prompt-meta p { font-size: 14px; color: var(--color-text-3); }
+
+    .prompt-steps {
+      display: flex; gap: 8px; margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .prompt-step-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--color-surface-1);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-full);
+      padding: 5px 12px;
+      font-size: 12px; color: var(--color-text-3);
+    }
+    .prompt-step-pill span { color: var(--color-accent); font-weight: 700; }
+
+    .env-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 24px;
+    }
+    .env-item {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+    .env-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: var(--color-accent);
+      font-weight: 500; margin-bottom: 3px;
+    }
+    .env-desc {
+      font-size: 12px; color: var(--color-text-3);
+    }
+    .env-where {
+      font-size: 11px; color: var(--color-text-4); margin-top: 2px;
+    }
+
+    .prompt-code-wrap { position: relative; }
+    .prompt-code {
+      background: var(--color-code-bg);
+      border: 1px solid rgba(201,231,93,0.1);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; line-height: 1.7;
+      color: var(--color-text-2);
+      max-height: 520px;
+      overflow-y: auto;
+    }
+    .prompt-code .ph { color: var(--color-error); font-weight: 600; }
+    .prompt-code .section { color: var(--color-accent); font-weight: 700; }
+    .prompt-code .comment { color: var(--color-text-4); font-style: italic; }
+    .prompt-code .h3 { color: #79c0ff; }
+
+    .copy-prompt-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%;
+      background: var(--color-accent);
+      color: var(--color-text-dark);
+      border: none;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 15px; font-weight: 800;
+      padding: 14px 24px;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      margin-top: 16px;
+      transition: all var(--duration-fast);
+      letter-spacing: 0.3px;
+    }
+    .copy-prompt-btn:hover { background: var(--color-accent-hover); transform: translateY(-1px); }
+    .copy-prompt-btn.copied {
+      background: var(--color-success);
+      color: #000;
+    }
+
+    /* ── Divider ── */
+    .section-divider {
+      display: flex; align-items: center; gap: 16px;
+      margin: 48px 0 32px;
+    }
+    .section-divider-line { flex: 1; height: 1px; background: var(--color-divider); }
+    .section-divider-text {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--color-text-4);
+      white-space: nowrap;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 24px 20px 80px; }
+      .env-grid { grid-template-columns: 1fr; }
+      .step-link { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- Navbar -->
+<nav>
+  <a class="nav-logo" href="homepage-ai-land.html">AI Land</a>
+  <span class="nav-title">/ <span>Automation Setup Guide</span></span>
+</nav>
+
+<!-- Layout -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-label">Кроки налаштування</div>
+
+    <div class="sidebar-step active" onclick="scrollToStep(1)" id="nav-1">
+      <div class="step-num"><span class="step-num-text">1</span></div>
+      <div class="step-nav-name">Telegram Bot</div>
+    </div>
+    <div class="sidebar-step" onclick="scrollToStep(2)" id="nav-2">
+      <div class="step-num"><span class="step-num-text">2</span></div>
+      <div class="step-nav-name">Supabase БД</div>
+    </div>
+    <div class="sidebar-step" onclick="scrollToStep(3)" id="nav-3">
+      <div class="step-num"><span class="step-num-text">3</span></div>
+      <div class="step-nav-name">OpenRouter API</div>
+    </div>
+    <div class="sidebar-step" onclick="scrollToStep(4)" id="nav-4">
+      <div class="step-num"><span class="step-num-text">4</span></div>
+      <div class="step-nav-name">n8n локально</div>
+    </div>
+    <div class="sidebar-step" onclick="scrollToStep(5)" id="nav-5">
+      <div class="step-num"><span class="step-num-text">5</span></div>
+      <div class="step-nav-name">Screenshot сервіс</div>
+    </div>
+    <div class="sidebar-step" onclick="scrollToStep(6)" id="nav-6">
+      <div class="step-num"><span class="step-num-text">6</span></div>
+      <div class="step-nav-name">Claude Code Prompt</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-cost">
+        Щомісячна вартість:<br>
+        <strong>~$5–30</strong> / month<br>
+        <span style="color:var(--color-text-4);font-size:10px">тільки OpenRouter API<br>(pay-per-use)</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-badge">⚙️ Setup Guide</div>
+      <h1>Automation<br><span>Setup Guide</span></h1>
+      <p class="hero-sub">6 кроків — і система сама знаходить нові AI-тули кожного понеділка, надсилає в Telegram на перегляд, і публікує їх після твого 👍</p>
+
+      <div class="progress-pills">
+        <div class="progress-pill" id="pill-1" onclick="scrollToStep(1)">
+          <div class="pill-num">1</div> Telegram
+        </div>
+        <div class="progress-pill" id="pill-2" onclick="scrollToStep(2)">
+          <div class="pill-num">2</div> Supabase
+        </div>
+        <div class="progress-pill" id="pill-3" onclick="scrollToStep(3)">
+          <div class="pill-num">3</div> OpenRouter
+        </div>
+        <div class="progress-pill" id="pill-4" onclick="scrollToStep(4)">
+          <div class="pill-num">4</div> n8n
+        </div>
+        <div class="progress-pill" id="pill-5" onclick="scrollToStep(5)">
+          <div class="pill-num">5</div> Screenshot
+        </div>
+        <div class="progress-pill" id="pill-6" onclick="scrollToStep(6)">
+          <div class="pill-num">6</div> Claude Prompt
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1 — Telegram -->
+    <div class="step-card" id="step-1">
+      <div class="step-header">
+        <div class="step-number">1</div>
+        <div class="step-icon">🤖</div>
+        <div class="step-meta">
+          <h2>Telegram Bot</h2>
+          <p>Канал для перегляду і публікації тулів реакцією</p>
+        </div>
+        <a class="step-link" href="https://t.me/BotFather" target="_blank">→ BotFather</a>
+      </div>
+      <div class="step-body">
+
+        <div class="substep">
+          <div class="substep-num">1</div>
+          <div class="substep-content">
+            <div class="substep-title">Відкрий BotFather і створи нового бота</div>
+            <div class="substep-desc">
+              Перейди в <a href="https://t.me/BotFather" target="_blank">@BotFather</a> в Telegram → надішли команду <code style="background:var(--color-surface-3);padding:2px 6px;border-radius:3px;font-size:12px">/newbot</code> → придумай назву та username для бота (має закінчуватись на <em>bot</em>)
+            </div>
+            <div class="save-box">
+              <div class="save-box-icon">🔐</div>
+              <div class="save-box-text"><strong>Зберегти: BOT TOKEN</strong> — виглядає як <code>123456789:AAFxxxxxx</code></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">2</div>
+          <div class="substep-content">
+            <div class="substep-title">Створи приватний канал</div>
+            <div class="substep-desc">
+              Telegram → New Channel → Private. Назви його, наприклад, <em>AI Land Review</em>. Це закритий канал тільки для тебе і бота.
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">3</div>
+          <div class="substep-content">
+            <div class="substep-title">Додай бота як адміністратора</div>
+            <div class="substep-desc">
+              Налаштування каналу → Administrators → Add Admin → знайди свого бота по username → дай права: Post Messages, Edit Messages, Delete Messages, Add Members. Важливо: увімкни <strong>реакції</strong> в налаштуваннях каналу.
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">4</div>
+          <div class="substep-content">
+            <div class="substep-title">Дізнайся CHANNEL_ID</div>
+            <div class="substep-desc">
+              Надішли будь-яке повідомлення в канал, потім відкрий в браузері:<br>
+              <code style="display:block;margin-top:6px;background:var(--color-surface-3);padding:6px 10px;border-radius:4px;font-size:12px">https://api.telegram.org/bot<span style="color:var(--color-error)">YOUR_TOKEN</span>/getUpdates</code>
+              Знайди поле <code>"chat":{"id":</code> — це і є CHANNEL_ID (зазвичай починається з <code>-100</code>)
+            </div>
+            <div class="save-box">
+              <div class="save-box-icon">🔐</div>
+              <div class="save-box-text"><strong>Зберегти: CHANNEL_ID</strong> — виглядає як <code>-1001234567890</code></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STEP 2 — Supabase -->
+    <div class="step-card" id="step-2">
+      <div class="step-header">
+        <div class="step-number">2</div>
+        <div class="step-icon">🗄️</div>
+        <div class="step-meta">
+          <h2>Supabase БД</h2>
+          <p>Безкоштовна база даних для тулів і черги публікацій</p>
+        </div>
+        <a class="step-link" href="https://supabase.com" target="_blank">→ supabase.com</a>
+      </div>
+      <div class="step-body">
+
+        <div class="substep">
+          <div class="substep-num">1</div>
+          <div class="substep-content">
+            <div class="substep-title">Зареєструйся і створи проект</div>
+            <div class="substep-desc">
+              Перейди на <a href="https://supabase.com" target="_blank">supabase.com</a> → Sign Up → New Project → придумай назву (напр. <em>ai-land</em>) і надійний пароль БД. Безкоштовний план — 500 МБ бази і 1 ГБ сховища, цього більш ніж достатньо.
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">2</div>
+          <div class="substep-content">
+            <div class="substep-title">Виконай SQL-схему — таблиці</div>
+            <div class="substep-desc">
+              Ліве меню → <strong>SQL Editor</strong> → New Query → встав вміст файлу <code>supabase/schema.sql</code> → натисни <strong>Run</strong>. Це створить таблиці <code>tools</code> і <code>pending_tools</code>.
+            </div>
+            <div class="code-wrap">
+              <pre class="code-block"><span class="comment">-- Вміст файлу supabase/schema.sql</span>
+<span class="comment">-- Він вже є в папці проекту</span></pre>
+              <button class="copy-btn" onclick="copyCode(this, 'schema')">📋 Copy path</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">3</div>
+          <div class="substep-content">
+            <div class="substep-title">Виконай SQL-схему — права доступу</div>
+            <div class="substep-desc">
+              Ще один запит в SQL Editor → вміст файлу <code>supabase/rls.sql</code> → <strong>Run</strong>. Це налаштує права доступу і створить публічний bucket для скріншотів.
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">4</div>
+          <div class="substep-content">
+            <div class="substep-title">Скопіюй ключі проекту</div>
+            <div class="substep-desc">
+              Ліве меню → <strong>Settings → API</strong>. Тобі потрібні два значення:
+            </div>
+            <div class="save-box">
+              <div class="save-box-icon">🔐</div>
+              <div class="save-box-text">
+                <strong>SUPABASE_URL</strong> — Project URL (виглядає як <code>https://xxxx.supabase.co</code>)<br>
+                <strong>SUPABASE_SERVICE_KEY</strong> — service_role key (довгий JWT токен — НЕ anon key!)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <div class="tip-text"><strong>Важливо:</strong> використовуй саме <code>service_role</code> key, а не <code>anon</code>. Service role дозволяє n8n і screenshot-сервісу записувати дані в обхід RLS-правил.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STEP 3 — OpenRouter -->
+    <div class="step-card" id="step-3">
+      <div class="step-header">
+        <div class="step-number">3</div>
+        <div class="step-icon">🔑</div>
+        <div class="step-meta">
+          <h2>OpenRouter API</h2>
+          <p>Один ключ — доступ до GPT-4o і Perplexity Sonar</p>
+        </div>
+        <a class="step-link" href="https://openrouter.ai/keys" target="_blank">→ openrouter.ai</a>
+      </div>
+      <div class="step-body">
+
+        <div class="substep">
+          <div class="substep-num">1</div>
+          <div class="substep-content">
+            <div class="substep-title">Зареєструйся на OpenRouter</div>
+            <div class="substep-desc">
+              Перейди на <a href="https://openrouter.ai" target="_blank">openrouter.ai</a> → Sign In → Google або GitHub.
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">2</div>
+          <div class="substep-content">
+            <div class="substep-title">Поповни баланс</div>
+            <div class="substep-desc">
+              <a href="https://openrouter.ai/credits" target="_blank">openrouter.ai/credits</a> → Add Credits → поповни $10. Цього вистачить на кілька місяців роботи. Система витрачає приблизно $0.05–0.15 за один тижневий запуск (15–20 тулів).
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">3</div>
+          <div class="substep-content">
+            <div class="substep-title">Створи API ключ</div>
+            <div class="substep-desc">
+              <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a> → Create Key → назви його <em>ai-land-automation</em> → скопіюй.
+            </div>
+            <div class="save-box">
+              <div class="save-box-icon">🔐</div>
+              <div class="save-box-text"><strong>Зберегти: OPENROUTER_API_KEY</strong> — виглядає як <code>sk-or-v1-xxxx</code></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-icon">💡</div>
+          <div class="tip-text">
+            <strong>Як OpenRouter використовується в системі:</strong><br>
+            • <code style="color:var(--color-accent)">perplexity/sonar</code> — шукає нові AI-тули в інтернеті (research)<br>
+            • <code style="color:var(--color-accent)">openai/gpt-4o</code> — генерує ELI5, теги, use cases для кожного тулу (enrich)
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STEP 4 — n8n -->
+    <div class="step-card" id="step-4">
+      <div class="step-header">
+        <div class="step-number">4</div>
+        <div class="step-icon">⚙️</div>
+        <div class="step-meta">
+          <h2>n8n локально</h2>
+          <p>Оркестратор всіх workflow — безкоштовний self-hosted</p>
+        </div>
+        <a class="step-link" href="https://docs.docker.com/get-started/get-docker/" target="_blank">→ Docker</a>
+        <a class="step-link step-link-ghost" href="https://docs.n8n.io" target="_blank">docs.n8n.io</a>
+      </div>
+      <div class="step-body">
+
+        <div class="substep">
+          <div class="substep-num">1</div>
+          <div class="substep-content">
+            <div class="substep-title">Встанови Docker Desktop</div>
+            <div class="substep-desc">
+              Якщо ще не встановлено: <a href="https://docs.docker.com/get-started/get-docker/" target="_blank">docs.docker.com/get-started/get-docker</a> → завантаж для macOS/Windows/Linux → встанови → запусти.
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">2</div>
+          <div class="substep-content">
+            <div class="substep-title">Запусти n8n через Docker</div>
+            <div class="substep-desc">Відкрий термінал і виконай команду:</div>
+            <div class="code-wrap">
+              <pre class="code-block" id="code-n8n"><span class="kw">docker</span> run -it --rm \
+  -p <span class="str">5678:5678</span> \
+  -v n8n_data:/home/node/.n8n \
+  n8nio/n8n</pre>
+              <button class="copy-btn" onclick="copyCode(this, 'n8n')">📋 Copy</button>
+            </div>
+            <div class="substep-desc" style="margin-top:8px">
+              Прапор <code>-v n8n_data:/home/node/.n8n</code> зберігає всі workflow і налаштування між перезапусками.
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">3</div>
+          <div class="substep-content">
+            <div class="substep-title">Відкрий n8n і зареєструйся</div>
+            <div class="substep-desc">
+              Перейди в браузері на <a href="http://localhost:5678" target="_blank">localhost:5678</a> → введи email і пароль → готово.
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">4</div>
+          <div class="substep-content">
+            <div class="substep-title">Увімкни n8n API (для Claude Code)</div>
+            <div class="substep-desc">
+              Settings (шестерня внизу зліва) → n8n API → Enable → скопіюй API Key.
+            </div>
+            <div class="save-box">
+              <div class="save-box-icon">🔐</div>
+              <div class="save-box-text"><strong>Зберегти: N8N_API_KEY</strong> — потрібен для Claude Code промпту</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box warn">
+          <div class="tip-icon">⚠️</div>
+          <div class="tip-text"><strong>Щоразу при перезапуску комп'ютера</strong> n8n треба запускати заново цією командою. Якщо хочеш щоб він працював постійно — додай прапор <code>--restart unless-stopped</code> і прибери <code>--rm</code>.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STEP 5 — Screenshot -->
+    <div class="step-card" id="step-5">
+      <div class="step-header">
+        <div class="step-number">5</div>
+        <div class="step-icon">📸</div>
+        <div class="step-meta">
+          <h2>Screenshot сервіс</h2>
+          <p>Playwright робить скріни сайтів і зберігає в Supabase Storage</p>
+        </div>
+        <a class="step-link" href="https://nodejs.org" target="_blank">→ Node.js</a>
+      </div>
+      <div class="step-body">
+
+        <div class="substep">
+          <div class="substep-num">1</div>
+          <div class="substep-content">
+            <div class="substep-title">Встанови Node.js</div>
+            <div class="substep-desc">
+              Якщо ще нема: <a href="https://nodejs.org" target="_blank">nodejs.org</a> → завантаж LTS версію → встанови. Перевір: <code>node --version</code> має показати <code>v18+</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">2</div>
+          <div class="substep-content">
+            <div class="substep-title">Встанови залежності</div>
+            <div class="substep-desc">В терміналі, з папки проекту:</div>
+            <div class="code-wrap">
+              <pre class="code-block" id="code-install"><span class="cmd">cd</span> automation
+<span class="cmd">npm</span> install
+<span class="cmd">npx</span> playwright install chromium</pre>
+              <button class="copy-btn" onclick="copyCode(this, 'install')">📋 Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">3</div>
+          <div class="substep-content">
+            <div class="substep-title">Заповни .env файл</div>
+            <div class="substep-desc">Скопіюй шаблон і встав свої дані:</div>
+            <div class="code-wrap">
+              <pre class="code-block" id="code-env"><span class="cmd">cp</span> .env.example .env
+<span class="cmd">nano</span> .env  <span class="comment"># або відкрий в будь-якому редакторі</span></pre>
+              <button class="copy-btn" onclick="copyCode(this, 'env-cmd')">📋 Copy</button>
+            </div>
+            <div class="substep-desc" style="margin-top:10px">Вміст файлу .env (вставити свої значення):</div>
+            <div class="code-wrap">
+              <pre class="code-block" id="code-env-content">SUPABASE_URL=<span class="ph">https://YOUR_PROJECT.supabase.co</span>
+SUPABASE_SERVICE_KEY=<span class="ph">eyJhbGciOiJI...</span></pre>
+              <button class="copy-btn" onclick="copyCode(this, 'env-content')">📋 Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="substep">
+          <div class="substep-num">4</div>
+          <div class="substep-content">
+            <div class="substep-title">Запусти сервіс і перевір</div>
+            <div class="code-wrap">
+              <pre class="code-block" id="code-start"><span class="cmd">npm</span> start
+<span class="comment"># → Screenshot service running on :3001</span></pre>
+              <button class="copy-btn" onclick="copyCode(this, 'start')">📋 Copy</button>
+            </div>
+            <div class="substep-desc" style="margin-top:8px">
+              Перевір що працює: відкрий <a href="http://localhost:3001/health" target="_blank">localhost:3001/health</a> — має повернути <code>{"status":"ok"}</code>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- STEP 6 — Claude Code Prompt -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-text">Фінальний крок</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="prompt-section" id="step-6">
+      <div class="prompt-header">
+        <div class="prompt-icon">✨</div>
+        <div class="prompt-meta">
+          <h2>Claude Code Prompt</h2>
+          <p>Вставте промпт у Claude Code — він сам налаштує всі 3 workflow в n8n</p>
+        </div>
+      </div>
+
+      <div class="prompt-steps">
+        <div class="prompt-step-pill"><span>1</span> Збери всі credentials</div>
+        <div class="prompt-step-pill"><span>2</span> Заміни плейсхолдери</div>
+        <div class="prompt-step-pill"><span>3</span> Вставте в Claude Code</div>
+        <div class="prompt-step-pill"><span>4</span> Готово — 3 workflow в n8n</div>
+      </div>
+
+      <div class="env-grid">
+        <div class="env-item">
+          <div class="env-key">OPENROUTER_API_KEY</div>
+          <div class="env-desc">Ключ OpenRouter</div>
+          <div class="env-where">→ openrouter.ai/keys (крок 3)</div>
+        </div>
+        <div class="env-item">
+          <div class="env-key">TELEGRAM_BOT_TOKEN</div>
+          <div class="env-desc">Токен від BotFather</div>
+          <div class="env-where">→ @BotFather в Telegram (крок 1)</div>
+        </div>
+        <div class="env-item">
+          <div class="env-key">TELEGRAM_CHANNEL_ID</div>
+          <div class="env-desc">ID приватного каналу</div>
+          <div class="env-where">→ getUpdates API (крок 1)</div>
+        </div>
+        <div class="env-item">
+          <div class="env-key">SUPABASE_URL</div>
+          <div class="env-desc">URL проекту Supabase</div>
+          <div class="env-where">→ Settings → API (крок 2)</div>
+        </div>
+        <div class="env-item">
+          <div class="env-key">SUPABASE_SERVICE_KEY</div>
+          <div class="env-desc">service_role JWT key</div>
+          <div class="env-where">→ Settings → API (крок 2)</div>
+        </div>
+        <div class="env-item">
+          <div class="env-key">N8N_API_KEY</div>
+          <div class="env-desc">n8n API key</div>
+          <div class="env-where">→ n8n Settings → API (крок 4)</div>
+        </div>
+      </div>
+
+      <div class="prompt-code-wrap">
+        <pre class="prompt-code" id="claude-prompt">You are setting up the full automation system for AI Land — a curated AI tools directory.
+
+<span class="section">## Your credentials (replace all placeholders before running)</span>
+
+OPENROUTER_API_KEY=<span class="ph">YOUR_OPENROUTER_KEY_HERE</span>
+TELEGRAM_BOT_TOKEN=<span class="ph">YOUR_BOT_TOKEN_HERE</span>
+TELEGRAM_CHANNEL_ID=<span class="ph">YOUR_CHANNEL_ID_HERE</span>
+SUPABASE_URL=<span class="ph">https://YOUR_PROJECT.supabase.co</span>
+SUPABASE_SERVICE_KEY=<span class="ph">YOUR_SERVICE_ROLE_KEY_HERE</span>
+N8N_URL=http://localhost:5678
+N8N_API_KEY=<span class="ph">YOUR_N8N_API_KEY_HERE</span>
+SCREENSHOT_SERVICE_URL=http://localhost:3001
+
+<span class="section">## Context</span>
+
+AI Land is a curated AI tools directory. The automation handles:
+1. Weekly discovery of new AI tools via Perplexity search
+2. Enrichment with ELI5 descriptions, tags, use cases via GPT-4o
+3. Screenshots of each tool's website via local Playwright service
+4. Telegram review channel — team sees each tool as a message
+5. Publish by reaction — 👍 on a message → tool goes live on website
+6. User submissions from the website → same Telegram review flow
+
+<span class="section">## Task: Create 3 n8n workflows via n8n REST API</span>
+
+Connect to n8n at N8N_URL using N8N_API_KEY.
+First create the required credentials in n8n, then create the 3 workflows.
+
+<span class="section">### Step 1 — Create credentials in n8n</span>
+
+<span class="h3">1a. OpenRouter credential (HTTP Header Auth)</span>
+Name: "OpenRouter"
+Type: httpHeaderAuth
+data: { name: "Authorization", value: "Bearer OPENROUTER_API_KEY" }
+
+<span class="h3">1b. Supabase credential</span>
+Name: "Supabase AI Land"
+Type: supabaseApi
+data: { host: SUPABASE_URL, serviceRole: SUPABASE_SERVICE_KEY }
+
+<span class="h3">1c. Telegram credential</span>
+Name: "Telegram AI Land Bot"
+Type: telegramApi
+data: { accessToken: TELEGRAM_BOT_TOKEN }
+
+<span class="section">### Step 2 — Workflow 1: "AI Land — Weekly Research"</span>
+
+Trigger: Schedule Trigger — every Monday at 09:00, timezone Europe/Kyiv
+
+Nodes in order:
+1. Schedule Trigger
+2. HTTP Request → OpenRouter (perplexity/sonar) — research prompt:
+   "Find 15-20 new or recently launched AI tools from the last 7 days.
+   Return ONLY a valid JSON array, no markdown. Each item must have:
+   name, website_url, description, price_type (free|freemium|paid), price_label,
+   category (one of: Assistants | Writing &amp; Content | Creativity &amp; Design |
+   Development | Research &amp; Analytics | Product Management | Productivity |
+   Marketing | Sales | Hiring &amp; HR)"
+3. Code node — parse response JSON, strip markdown fences if present:
+   const raw = $input.first().json.choices[0].message.content;
+   const clean = raw.replace(/```json|```/g, '').trim();
+   const tools = JSON.parse(clean);
+   return tools.map(t => ({ json: t }));
+4. Split In Batches (size: 1)
+5. Supabase node — SELECT from tools WHERE website_url = {{ $json.website_url }}
+6. IF node — continue only if result length === 0 (new tool, not duplicate)
+7. HTTP Request → OpenRouter (openai/gpt-4o) — enrich prompt:
+   System: "You write for AI Land — a curated AI tools directory. Always respond with valid JSON only."
+   User: "Tool: {{ $json.name }}\nURL: {{ $json.website_url }}\nDescription: {{ $json.description }}\nCategory: {{ $json.category }}\n\nGenerate JSON: { \"eli5\": \"one fun sentence explaining this for a 5-year-old, in quotes\", \"tags\": [\"max 3 from: Creative|Popular|Pro-level|Fast|Beginner|Team|Pricey|New\"], \"use_cases\": [\"5-6 short specific use case phrases\"], \"slug\": \"url-friendly-slug\" }"
+8. Code node — parse enrich response and merge data:
+   const content = $input.first().json.choices[0].message.content;
+   const clean = content.replace(/```json|```/g, '').trim();
+   const enriched = JSON.parse(clean);
+   const prev = $node['Split In Batches'].json;
+   return [{ json: { ...prev, ...enriched } }];
+9. HTTP Request → SCREENSHOT_SERVICE_URL/screenshot (POST):
+   Body: { url: {{ $json.website_url }}, slug: {{ $json.slug }} }
+   continueOnFail: true
+10. Supabase INSERT into pending_tools:
+    tool_data: { name, slug, category, description, eli5, tags, use_cases, price_label, price_type, website_url, screenshot_url: {{ $node['Screenshot'].json.publicUrl }} }
+    status: "pending_review"
+    source: "weekly_research"
+11. Wait node — 1 second (avoid rate limits)
+12. Telegram — Send Photo to TELEGRAM_CHANNEL_ID:
+    Photo: {{ $json.tool_data.screenshot_url }}
+    Caption (Markdown):
+    🆕 *{{ $json.tool_data.name }}*
+    📁 {{ $json.tool_data.category }} · 💰 {{ $json.tool_data.price_label }}
+
+    📝 {{ $json.tool_data.description }}
+
+    🙃 _"{{ $json.tool_data.eli5 }}"_
+
+    🏷 {{ $json.tool_data.tags.join(' · ') }}
+
+    *Use cases:*
+    {{ $json.tool_data.use_cases.map(u => '• ' + u).join('\n') }}
+
+    🔗 {{ $json.tool_data.website_url }}
+13. Supabase UPDATE pending_tools SET telegram_msg_id = {{ $node['Telegram'].json.message_id }}
+    WHERE id = {{ $node['Supabase Insert'].json.id }}
+
+<span class="section">### Step 3 — Workflow 2: "AI Land — User Submission"</span>
+
+Trigger: Webhook — POST /submit-tool, respond immediately with 200
+
+Nodes in order:
+1. Webhook trigger
+2. Code node — validate and sanitize:
+   const b = $json.body;
+   if (b.hp) return []; // honeypot check
+   if (!b.tool_name?.trim()) return [];
+   try { new URL(b.website_url) } catch { return []; }
+   if (!b.description || b.description.length &lt; 20) return [];
+   if (!b.category) return [];
+   return [{ json: {
+     name: b.tool_name.trim(),
+     website_url: b.website_url.trim(),
+     description: b.description.trim(),
+     category: b.category,
+     price_type: b.price_type || 'freemium',
+     price_label: b.price_label || '',
+     submitted_by_name: b.your_name || 'Anonymous',
+     submitted_by_email: b.your_email || ''
+   }}];
+3. Supabase SELECT from tools WHERE website_url = {{ $json.website_url }}
+4. IF node — continue only if not duplicate
+5-12. Same as Workflow 1 steps 7-13, but:
+   - source: "user_submission"
+   - submitted_by: {{ $json.submitted_by_name }} ({{ $json.submitted_by_email }})
+   - Telegram caption prefix:
+     ⚡️ *[USER SUBMITTED]*
+     👤 {{ $json.submitted_by_name }} {{ $json.submitted_by_email ? '(' + $json.submitted_by_email + ')' : '' }}
+
+<span class="section">### Step 4 — Workflow 3: "AI Land — Reaction Publish"</span>
+
+Trigger: Webhook — POST /tg-reaction (Telegram will send reactions here)
+
+Nodes in order:
+1. Webhook trigger
+2. Code node — extract reaction:
+   const reaction = $json.body.message_reaction;
+   if (!reaction) return [];
+   const emoji = reaction.new_reaction?.[0]?.emoji;
+   const msg_id = reaction.message_id;
+   if (!['👍', '✅', '❌'].includes(emoji)) return [];
+   return [{ json: { emoji, msg_id, is_approve: emoji !== '❌' } }];
+3. Supabase SELECT from pending_tools WHERE telegram_msg_id = {{ $json.msg_id }} AND status = 'pending_review'
+4. IF node — continue only if result found
+5. IF node — split on is_approve
+   TRUE branch (approve):
+     5a. Supabase INSERT into tools from tool_data jsonb:
+         published: true, published_at: now(), submitted_by_user: (source === 'user_submission')
+     5b. Supabase UPDATE pending_tools SET status = 'approved'
+     5c. Telegram sendMessage to TELEGRAM_CHANNEL_ID:
+         Reply to message: {{ $json.msg_id }}
+         Text: ✅ *{{ $json[0].tool_data.name }}* is now live on AI Land 🚀
+   FALSE branch (reject):
+     5d. Supabase UPDATE pending_tools SET status = 'rejected'
+
+<span class="section">### Step 5 — Register Telegram webhook</span>
+
+After creating the workflows and activating them, make this HTTP call to register
+the Telegram webhook so reactions are forwarded to n8n:
+
+POST https://api.telegram.org/botTELEGRAM_BOT_TOKEN/setWebhook
+Body: {
+  "url": "N8N_URL/webhook/tg-reaction",
+  "allowed_updates": ["message_reaction"]
+}
+
+<span class="section">### Step 6 — Verify</span>
+
+After setup:
+1. Manually trigger Workflow 1 — confirm messages appear in Telegram channel
+2. Test Workflow 2 by POSTing to N8N_URL/webhook/submit-tool with sample data
+3. React with 👍 to a message — confirm the tool appears in Supabase tools table with published=true
+
+If n8n API is unavailable or returns errors, output the 3 workflow JSON files
+ready for manual import via n8n UI (Settings → Import workflow).</pre>
+        <button class="copy-btn" style="position:absolute;top:12px;right:12px;padding:6px 14px;font-size:12px" onclick="copyPrompt(this)" id="copy-prompt-top">📋 Copy</button>
+      </div>
+
+      <button class="copy-prompt-btn" id="copy-prompt-btn" onclick="copyPrompt(this)">
+        📋 Copy Claude Code Prompt
+      </button>
+    </div>
+
+    <!-- Final tip -->
+    <div class="tip-box" style="margin-top:32px">
+      <div class="tip-icon">🚀</div>
+      <div class="tip-text">
+        <strong>Після налаштування:</strong> кожного понеділка о 09:00 система сама знайде 15-20 нових AI-тулів, надішле їх у твій Telegram канал зі скріншотом і описом. Постав 👍 — тул з'явиться на сайті. Постав ❌ — відхилиться. Ніяких ручних дій більше не потрібно.
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── Particles ──
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let dots = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+for (let i = 0; i < 60; i++) {
+  dots.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 1.2 + 0.3,
+    vx: (Math.random() - 0.5) * 0.15,
+    vy: (Math.random() - 0.5) * 0.15,
+    a: Math.random() * 0.4 + 0.1
+  });
+}
+
+function animateDots() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  dots.forEach(d => {
+    d.x += d.vx; d.y += d.vy;
+    if (d.x < 0 || d.x > canvas.width) d.vx *= -1;
+    if (d.y < 0 || d.y > canvas.height) d.vy *= -1;
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(201,231,93,${d.a})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(animateDots);
+}
+animateDots();
+
+// ── Scroll to step ──
+function scrollToStep(n) {
+  const el = document.getElementById('step-' + n);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Active sidebar on scroll ──
+const stepIds = [1,2,3,4,5,6];
+function updateActive() {
+  const scrollY = window.scrollY + 100;
+  let current = 1;
+  stepIds.forEach(n => {
+    const el = document.getElementById('step-' + n);
+    if (el && el.offsetTop <= scrollY) current = n;
+  });
+  stepIds.forEach(n => {
+    document.getElementById('nav-' + n)?.classList.toggle('active', n === current);
+  });
+}
+window.addEventListener('scroll', updateActive);
+
+// ── Copy code ──
+const codeSources = {
+  'n8n': `docker run -it --rm \\\n  -p 5678:5678 \\\n  -v n8n_data:/home/node/.n8n \\\n  n8nio/n8n`,
+  'install': `cd automation\nnpm install\nnpx playwright install chromium`,
+  'env-cmd': `cp .env.example .env\nnano .env`,
+  'env-content': `SUPABASE_URL=https://YOUR_PROJECT.supabase.co\nSUPABASE_SERVICE_KEY=eyJhbGciOiJI...`,
+  'start': `npm start`,
+  'schema': `supabase/schema.sql`
+};
+
+function copyCode(btn, key) {
+  const text = codeSources[key] || '';
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// ── Copy prompt ──
+function copyPrompt(btn) {
+  const pre = document.getElementById('claude-prompt');
+  const text = pre.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btns = [
+      document.getElementById('copy-prompt-btn'),
+      document.getElementById('copy-prompt-top')
+    ];
+    btns.forEach(b => {
+      if (!b) return;
+      const orig = b.innerHTML;
+      b.innerHTML = b === document.getElementById('copy-prompt-btn')
+        ? '✓ Prompt Copied!'
+        : '✓ Copied!';
+      b.classList.add('copied');
+      setTimeout(() => { b.innerHTML = orig; b.classList.remove('copied'); }, 2000);
+    });
+  });
+}
+</script>
+</body>
+</html>

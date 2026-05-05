@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-page:      #0a0a0c;
+  --color-s1:        #181b38;
+  --color-s2:        #1c2146;
+  --color-s3:        #25295d;
+  --color-s4:        #272b66;
+  --color-s5:        #4f548e;
+  --color-accent:    #c9e75d;
+  --color-accent-h:  #e3ff7c;
+  --color-t1:        #fafafa;
+  --color-t2:        #e0ddeb;
+  --color-t3:        #b1b1d3;
+  --color-t4:        #7676a1;
+  --color-dark:      #121312;
+  --color-success:   #0fd79c;
+  --color-error:     #f65959;
+  --color-warning:   #eca911;
+  --color-divider:   rgba(255,255,255,0.06);
+
+  /* Category tier colors */
+  --color-cat-assistants:   #ba8fff;
+  --color-cat-writing:      #5166bf;
+  --color-cat-creative:     #ff38f4;
+  --color-cat-dev:          #4fc3f7;
+  --color-cat-research:     #c9e75d;
+  --color-cat-product:      #0fd79c;
+  --color-cat-productivity: #b1b1d3;
+  --color-cat-marketing:    #eca911;
+  --color-cat-sales:        #ff5500;
+  --color-cat-hr:           #f65959;
+
+  --font-sans: var(--font-exo2);
+  --font-mono: var(--font-jetbrains);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* page transitions land instantly at top — no smooth scroll animation */
+html { scroll-behavior: auto; }
+
+body {
+  background: var(--color-page);
+  color: var(--color-t1);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
+
+/* Scrollbar */
+* { scrollbar-width: thin; scrollbar-color: var(--color-s3) transparent; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-s3); border-radius: 2px; }
+
+/* Selection */
+::selection { background: rgba(255,255,255,0.18); color: #ffffff; }
+
+/* Focus ring — only on links/buttons, not inputs (inputs handle their own focus via border) */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.35);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}

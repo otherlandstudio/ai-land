@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Tool — AI Land</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-page:      #15182f;
+      --color-surface-1: #181b38;
+      --color-surface-2: #1c2146;
+      --color-surface-3: #25295d;
+      --color-surface-4: #272b66;
+      --color-surface-5: #4f548e;
+      --color-overlay:   rgba(12,14,31,0.84);
+
+      --color-accent:       #c9e75d;
+      --color-accent-hover: #e3ff7c;
+
+      --color-text-1: #fafafa;
+      --color-text-2: #e0ddeb;
+      --color-text-3: #b1b1d3;
+      --color-text-4: #7676a1;
+      --color-text-dark: #121312;
+
+      --color-success: #0fd79c;
+      --color-error:   #f65959;
+      --color-divider: #1b1c2e;
+
+      --radius-sm:   4px;
+      --radius-md:   8px;
+      --radius-lg:   12px;
+      --radius-xl:   16px;
+      --radius-full: 9999px;
+      --shadow-md: 0 8px 32px rgba(0,0,0,0.35);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,0.35);
+      --navbar-height: 60px;
+      --duration-base: 200ms;
+      --duration-fast: 150ms;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: none; }
+    *::-webkit-scrollbar { display: none; }
+
+    body {
+      font-family: 'Exo 2', system-ui, sans-serif;
+      font-size: 14px; color: var(--color-text-1);
+      background: var(--color-page); line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: rgba(201,231,93,0.25); color: #fafafa; }
+    :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: inherit; }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+      height: var(--navbar-height);
+      background: var(--color-surface-1);
+      border-bottom: 1px solid var(--color-divider);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; }
+    .nav-logo-icon {
+      width: 32px; height: 32px; border-radius: var(--radius-md);
+      background: var(--color-accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 800; color: var(--color-text-dark);
+    }
+    .nav-logo-name { font-size: 16px; font-weight: 700; color: var(--color-text-1); }
+    .nav-search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--color-surface-2); border: 1px solid var(--color-surface-4);
+      border-radius: var(--radius-md); padding: 0 14px; height: 38px; width: 300px; cursor: pointer;
+      transition: border-color var(--duration-base);
+    }
+    .nav-search:hover { border-color: var(--color-surface-5); }
+    .nav-search-text { font-size: 14px; color: var(--color-text-4); flex: 1; }
+    .nav-search-kbd {
+      background: var(--color-surface-3); border-radius: var(--radius-sm);
+      padding: 2px 7px; font-size: 11px; font-weight: 600; color: var(--color-text-4);
+    }
+    .nav-cta {
+      background: var(--color-accent); color: var(--color-text-dark);
+      border: none; border-radius: var(--radius-lg);
+      padding: 0 20px; height: 38px;
+      font-size: 14px; font-weight: 600; font-family: 'Exo 2', sans-serif;
+      cursor: pointer; transition: background var(--duration-base);
+    }
+    .nav-cta:hover { background: var(--color-accent-hover); }
+
+    /* ── PAGE ── */
+    .page {
+      padding-top: var(--navbar-height);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .main {
+      flex: 1;
+      max-width: 1060px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 48px 32px 80px;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 48px;
+      align-items: start;
+    }
+
+    /* ── LEFT: FORM ── */
+    .form-section {}
+
+    .page-title {
+      font-size: 28px; font-weight: 800;
+      color: var(--color-text-1);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .page-sub {
+      font-size: 14px; color: var(--color-text-4);
+      margin-bottom: 32px; line-height: 1.6;
+    }
+    .page-sub a { color: var(--color-text-3); text-decoration: none; }
+    .page-sub a:hover { color: var(--color-accent); }
+
+    /* Form */
+    .form { display: flex; flex-direction: column; gap: 20px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .label {
+      font-size: 12px; font-weight: 700;
+      color: var(--color-text-3);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .label-required {
+      color: var(--color-accent);
+      font-size: 14px; line-height: 1;
+    }
+    .label-optional {
+      color: var(--color-text-4);
+      font-size: 10px; font-weight: 500;
+      text-transform: none; letter-spacing: 0;
+      background: var(--color-surface-2);
+      border-radius: var(--radius-sm);
+      padding: 1px 6px;
+    }
+
+    .input, .textarea, .select {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-surface-4);
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      font-family: 'Exo 2', sans-serif;
+      font-size: 14px; font-weight: 400;
+      color: var(--color-text-1);
+      transition: border-color var(--duration-base), box-shadow var(--duration-base);
+      width: 100%;
+      -webkit-appearance: none;
+    }
+    .input::placeholder, .textarea::placeholder { color: var(--color-text-4); }
+    .input:focus, .textarea:focus, .select:focus {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(201,231,93,0.1);
+    }
+    .input.error, .textarea.error, .select.error {
+      border-color: var(--color-error);
+      box-shadow: 0 0 0 3px rgba(246,89,89,0.1);
+    }
+
+    .textarea { resize: vertical; min-height: 96px; line-height: 1.6; }
+
+    .select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237676a1' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .select option {
+      background: var(--color-surface-2);
+      color: var(--color-text-1);
+    }
+
+    .char-count {
+      font-size: 11px; color: var(--color-text-4);
+      text-align: right; margin-top: 4px;
+    }
+    .char-count.warn { color: var(--color-warning); }
+    .char-count.over { color: var(--color-error); }
+
+    .field-hint {
+      font-size: 12px; color: var(--color-text-4);
+      line-height: 1.4;
+    }
+    .field-error {
+      font-size: 12px; color: var(--color-error);
+      display: none;
+    }
+    .field-error.visible { display: block; }
+
+    /* Price type toggle */
+    .price-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
+    .price-opt {
+      flex: 1; padding: 8px 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-surface-4);
+      background: var(--color-surface-2);
+      font-family: 'Exo 2', sans-serif;
+      font-size: 12px; font-weight: 600;
+      color: var(--color-text-4);
+      cursor: pointer;
+      transition: all var(--duration-base);
+      text-align: center;
+    }
+    .price-opt:hover { border-color: var(--color-surface-5); color: var(--color-text-2); }
+    .price-opt.active {
+      background: rgba(201,231,93,0.1);
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    /* Divider */
+    .form-divider {
+      height: 1px; background: var(--color-divider);
+      margin: 4px 0;
+    }
+    .form-section-title {
+      font-size: 11px; font-weight: 700;
+      color: var(--color-text-4);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* Submit button */
+    .submit-btn {
+      background: var(--color-accent); color: var(--color-text-dark);
+      border: none; border-radius: var(--radius-lg);
+      height: 50px; width: 100%;
+      font-size: 15px; font-weight: 700; font-family: 'Exo 2', sans-serif;
+      cursor: pointer;
+      transition: background var(--duration-base), transform var(--duration-fast);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      position: relative; overflow: hidden;
+    }
+    .submit-btn:hover { background: var(--color-accent-hover); }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled {
+      opacity: 0.4; cursor: not-allowed; transform: none;
+    }
+
+    /* Loading state */
+    .submit-btn.loading .btn-text { opacity: 0; }
+    .submit-btn .spinner {
+      position: absolute;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(18,19,18,0.3);
+      border-top-color: var(--color-text-dark);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .submit-btn.loading .spinner { display: block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .form-note {
+      font-size: 12px; color: var(--color-text-4);
+      text-align: center; line-height: 1.5;
+    }
+
+    /* ── SUCCESS STATE ── */
+    .success-state {
+      display: none;
+      flex-direction: column; align-items: center;
+      text-align: center; padding: 48px 24px;
+      animation: fadeIn 300ms ease-out;
+    }
+    .success-state.visible { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+    .success-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(15,215,156,0.12);
+      border: 2px solid var(--color-success);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin-bottom: 20px;
+    }
+    .success-title {
+      font-size: 24px; font-weight: 800;
+      color: var(--color-text-1); margin-bottom: 8px;
+    }
+    .success-sub {
+      font-size: 14px; color: var(--color-text-4);
+      line-height: 1.7; margin-bottom: 28px;
+      max-width: 380px;
+    }
+    .success-sub strong { color: var(--color-text-2); }
+    .btn-back {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-surface-4);
+      border-radius: var(--radius-lg);
+      padding: 0 24px; height: 44px;
+      font-size: 14px; font-weight: 600; font-family: 'Exo 2', sans-serif;
+      color: var(--color-text-2); cursor: pointer;
+      transition: all var(--duration-base);
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .btn-back:hover { background: var(--color-surface-3); color: var(--color-text-1); }
+
+    /* ── RIGHT: INFO PANEL ── */
+    .info-panel { display: flex; flex-direction: column; gap: 16px; }
+
+    .info-card {
+      background: var(--color-surface-1);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+    }
+
+    .info-card-title {
+      font-size: 14px; font-weight: 700;
+      color: var(--color-text-1); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .process-list { display: flex; flex-direction: column; gap: 0; }
+    .process-step {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--color-divider);
+    }
+    .process-step:last-child { border-bottom: none; padding-bottom: 0; }
+    .process-step:first-child { padding-top: 0; }
+
+    .step-num {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-surface-4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--color-text-4);
+      margin-top: 1px;
+    }
+    .step-num.done { background: rgba(201,231,93,0.1); border-color: var(--color-accent); color: var(--color-accent); }
+    .step-body {}
+    .step-title { font-size: 13px; font-weight: 600; color: var(--color-text-1); margin-bottom: 2px; }
+    .step-desc  { font-size: 12px; color: var(--color-text-4); line-height: 1.5; }
+
+    .criteria-list { display: flex; flex-direction: column; gap: 8px; }
+    .criteria-item {
+      display: flex; gap: 10px; align-items: flex-start;
+      font-size: 13px; color: var(--color-text-3);
+      line-height: 1.4;
+    }
+    .criteria-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+    .info-note {
+      font-size: 12px; color: var(--color-text-4);
+      line-height: 1.6;
+      padding: 12px 14px;
+      background: var(--color-surface-2);
+      border-radius: var(--radius-md);
+      border-left: 3px solid var(--color-surface-5);
+    }
+    .info-note strong { color: var(--color-text-3); }
+
+    /* ── FOOTER ── */
+    .footer {
+      padding: 28px 32px;
+      border-top: 1px solid var(--color-divider);
+      background: var(--color-surface-1);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .footer-brand { font-size: 13px; color: var(--color-text-4); }
+    .footer-brand a { color: var(--color-text-3); text-decoration: none; }
+    .footer-brand a:hover { color: var(--color-text-1); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 13px; font-weight: 500; color: var(--color-text-4); text-decoration: none; transition: color var(--duration-base); }
+    .footer-links a:hover { color: var(--color-text-1); }
+
+    @media (max-width: 900px) {
+      .main { grid-template-columns: 1fr; gap: 32px; padding: 32px 16px 60px; }
+      .info-panel { order: -1; }
+      .navbar { padding: 0 16px; }
+      .nav-search { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo" onclick="window.location='homepage-ai-land.html'">
+      <div class="nav-logo-icon">AI</div>
+      <span class="nav-logo-name">AI Land</span>
+    </div>
+    <div class="nav-search">
+      <span style="color:var(--color-text-4);font-size:14px">⌕</span>
+      <span class="nav-search-text">Find an AI tool...</span>
+      <span class="nav-search-kbd">⌘K</span>
+    </div>
+    <button class="nav-cta">Submit Tool</button>
+  </nav>
+
+  <div class="page">
+    <div class="main">
+
+      <!-- ═══ LEFT: FORM ═══ -->
+      <div class="form-section">
+
+        <!-- Default form state -->
+        <div id="formState">
+          <h1 class="page-title">Submit a Tool</h1>
+          <p class="page-sub">
+            Found an AI tool that deserves a spot? Tell us about it.
+            We review every submission manually — quality over quantity.
+          </p>
+
+          <form class="form" id="submitForm" novalidate onsubmit="handleSubmit(event)">
+
+            <!-- Tool Name + URL -->
+            <div class="field-row">
+              <div class="field">
+                <label class="label" for="toolName">
+                  Tool Name <span class="label-required">*</span>
+                </label>
+                <input class="input" id="toolName" type="text"
+                  placeholder="e.g. Notion AI"
+                  maxlength="80"
+                  oninput="clearError(this)">
+                <span class="field-error" id="err-toolName">Please enter the tool name</span>
+              </div>
+              <div class="field">
+                <label class="label" for="toolUrl">
+                  Website URL <span class="label-required">*</span>
+                </label>
+                <input class="input" id="toolUrl" type="url"
+                  placeholder="https://example.com"
+                  oninput="clearError(this)">
+                <span class="field-error" id="err-toolUrl">Enter a valid URL</span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="field">
+              <label class="label" for="toolDesc">
+                Short Description <span class="label-required">*</span>
+              </label>
+              <textarea class="textarea" id="toolDesc"
+                placeholder="What does this tool do? Who is it for? What problem does it solve?"
+                maxlength="280"
+                oninput="updateCharCount(this, 'descCount', 280); clearError(this)"></textarea>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span class="field-error" id="err-toolDesc">Please add a description (20 chars min)</span>
+                <span class="char-count" id="descCount">0 / 280</span>
+              </div>
+            </div>
+
+            <!-- Category -->
+            <div class="field">
+              <label class="label" for="toolCategory">
+                Category <span class="label-required">*</span>
+              </label>
+              <select class="select" id="toolCategory" oninput="clearError(this)">
+                <option value="" disabled selected>Select a category...</option>
+                <option>Assistants</option>
+                <option>Writing & Content</option>
+                <option>Creativity & Design</option>
+                <option>Development</option>
+                <option>Research & Analytics</option>
+                <option>Product Management</option>
+                <option>Productivity</option>
+                <option>Marketing</option>
+                <option>Sales</option>
+                <option>Hiring & HR</option>
+              </select>
+              <span class="field-error" id="err-toolCategory">Please select a category</span>
+            </div>
+
+            <!-- Pricing -->
+            <div class="field">
+              <label class="label">Pricing Model <span class="label-required">*</span></label>
+              <div class="price-toggle">
+                <button type="button" class="price-opt active" onclick="setPricing(this, 'free')">Free</button>
+                <button type="button" class="price-opt" onclick="setPricing(this, 'freemium')">Freemium</button>
+                <button type="button" class="price-opt" onclick="setPricing(this, 'paid')">Paid</button>
+              </div>
+              <input class="input" id="toolPrice" type="text"
+                placeholder="e.g. Free / $20/mo, From $49/mo"
+                style="display:none;"
+                oninput="clearError(this)">
+              <span class="field-hint" id="pricingHint">Tool is completely free to use</span>
+              <span class="field-error" id="err-toolPrice">Please specify the price</span>
+            </div>
+
+            <div class="form-divider"></div>
+            <div class="form-section-title">Your Details <span style="font-size:10px;font-weight:500;color:var(--color-text-4);text-transform:none;letter-spacing:0;margin-left:6px;">optional</span></div>
+
+            <!-- Name + Email -->
+            <div class="field-row">
+              <div class="field">
+                <label class="label" for="yourName">
+                  Your Name <span class="label-optional">optional</span>
+                </label>
+                <input class="input" id="yourName" type="text" placeholder="Jane Doe">
+              </div>
+              <div class="field">
+                <label class="label" for="yourEmail">
+                  Your Email <span class="label-optional">optional</span>
+                </label>
+                <input class="input" id="yourEmail" type="email" placeholder="jane@example.com">
+              </div>
+            </div>
+
+            <!-- Honeypot (hidden) -->
+            <input type="text" id="hp" name="hp" style="display:none" tabindex="-1" autocomplete="off">
+
+            <button class="submit-btn" type="submit" id="submitBtn">
+              <span class="btn-text">Submit for Review →</span>
+              <div class="spinner"></div>
+            </button>
+
+            <p class="form-note">
+              We review every submission. Most tools get reviewed within 3–5 days.
+            </p>
+
+          </form>
+        </div>
+
+        <!-- Success state -->
+        <div class="success-state" id="successState">
+          <div class="success-icon">✓</div>
+          <h2 class="success-title">Submission received!</h2>
+          <p class="success-sub">
+            Thanks for submitting <strong id="successToolName"></strong>.
+            Our team will review it and you'll see it on AI Land if it makes the cut.
+            Usually takes <strong>3–5 days</strong>.
+          </p>
+          <a class="btn-back" href="homepage-ai-land.html">← Back to Directory</a>
+        </div>
+
+      </div>
+
+      <!-- ═══ RIGHT: INFO PANEL ═══ -->
+      <div class="info-panel">
+
+        <!-- How it works -->
+        <div class="info-card">
+          <div class="info-card-title">⚡ How it works</div>
+          <div class="process-list">
+            <div class="process-step">
+              <div class="step-num done">1</div>
+              <div class="step-body">
+                <div class="step-title">You submit</div>
+                <div class="step-desc">Fill out the form. Takes about 2 minutes.</div>
+              </div>
+            </div>
+            <div class="process-step">
+              <div class="step-num">2</div>
+              <div class="step-body">
+                <div class="step-title">We review</div>
+                <div class="step-desc">Our team checks the tool and enriches the listing with use cases, ELI5 description, and tags.</div>
+              </div>
+            </div>
+            <div class="process-step">
+              <div class="step-num">3</div>
+              <div class="step-body">
+                <div class="step-title">Goes live</div>
+                <div class="step-desc">Approved tools appear in the directory within 3–5 days.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- What we look for -->
+        <div class="info-card">
+          <div class="info-card-title">✓ What we look for</div>
+          <div class="criteria-list">
+            <div class="criteria-item">
+              <span class="criteria-icon">🎯</span>
+              <span>Solves a real problem — not just a demo or experiment</span>
+            </div>
+            <div class="criteria-item">
+              <span class="criteria-icon">🚀</span>
+              <span>Accessible to use — has a working product, not just a landing page</span>
+            </div>
+            <div class="criteria-item">
+              <span class="criteria-icon">💡</span>
+              <span>Genuinely AI-powered — not just AI-branded</span>
+            </div>
+            <div class="criteria-item">
+              <span class="criteria-icon">📦</span>
+              <span>Clear use case — we can explain it in one sentence</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Note -->
+        <div class="info-note">
+          <strong>Heads up:</strong> Submitting doesn't guarantee inclusion. We keep the directory quality-focused. If your tool isn't included, it's not personal — it might just not be the right fit right now.
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-brand">Curated with love by <a href="https://otherland.studio">Other Land studio</a></div>
+      <nav class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Sponsor</a>
+        <a href="#">Submit ↗</a>
+      </nav>
+    </footer>
+  </div>
+
+  <script>
+    let pricingType = 'free';
+
+    function setPricing(btn, type) {
+      pricingType = type;
+      document.querySelectorAll('.price-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const priceInput = document.getElementById('toolPrice');
+      const hint = document.getElementById('pricingHint');
+
+      if (type === 'free') {
+        priceInput.style.display = 'none';
+        hint.textContent = 'Tool is completely free to use';
+        hint.style.display = 'block';
+      } else if (type === 'freemium') {
+        priceInput.style.display = 'block';
+        priceInput.placeholder = 'e.g. Free / $20/mo';
+        hint.textContent = 'Has a free tier with optional paid upgrade';
+        hint.style.display = 'block';
+      } else {
+        priceInput.style.display = 'block';
+        priceInput.placeholder = 'e.g. From $49/mo, $10/mo';
+        hint.textContent = 'Paid only — no free tier';
+        hint.style.display = 'block';
+      }
+    }
+
+    function updateCharCount(el, countId, max) {
+      const len = el.value.length;
+      const el2 = document.getElementById(countId);
+      el2.textContent = `${len} / ${max}`;
+      el2.className = 'char-count' + (len > max * 0.9 ? (len >= max ? ' over' : ' warn') : '');
+    }
+
+    function clearError(el) {
+      el.classList.remove('error');
+      const errEl = document.getElementById('err-' + el.id);
+      if (errEl) errEl.classList.remove('visible');
+    }
+
+    function showError(id, msg) {
+      const input = document.getElementById(id);
+      const err   = document.getElementById('err-' + id);
+      input.classList.add('error');
+      if (msg) err.textContent = msg;
+      err.classList.add('visible');
+    }
+
+    function isValidUrl(str) {
+      try { new URL(str); return true; } catch { return false; }
+    }
+
+    function validate() {
+      let ok = true;
+
+      const name = document.getElementById('toolName').value.trim();
+      if (!name) { showError('toolName'); ok = false; }
+
+      const url = document.getElementById('toolUrl').value.trim();
+      if (!url || !isValidUrl(url)) { showError('toolUrl', 'Enter a valid URL (include https://)'); ok = false; }
+
+      const desc = document.getElementById('toolDesc').value.trim();
+      if (desc.length < 20) { showError('toolDesc', 'Description is too short (20 chars min)'); ok = false; }
+
+      const cat = document.getElementById('toolCategory').value;
+      if (!cat) { showError('toolCategory'); ok = false; }
+
+      if (pricingType !== 'free') {
+        const price = document.getElementById('toolPrice').value.trim();
+        if (!price) { showError('toolPrice', 'Please specify the price'); ok = false; }
+      }
+
+      return ok;
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+
+      // Honeypot check
+      if (document.getElementById('hp').value) return;
+
+      if (!validate()) {
+        // Scroll to first error
+        const firstErr = document.querySelector('.input.error, .textarea.error, .select.error');
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // Simulate submission
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      setTimeout(() => {
+        const toolName = document.getElementById('toolName').value.trim();
+        document.getElementById('successToolName').textContent = toolName;
+        document.getElementById('formState').style.display = 'none';
+        document.getElementById('successState').classList.add('visible');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 1400);
+    }
+  </script>
+
+</body>
+</html>

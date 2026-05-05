@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Land — Site Structure · webf.love</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #080808;
+      color: #e0e0e0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 24px 80px; }
+
+    /* ─── HEADER ─── */
+    .doc-header { margin-bottom: 56px; padding-bottom: 28px; border-bottom: 1px solid #1e1e1e; display: flex; justify-content: space-between; align-items: flex-end; }
+    .doc-header-left h1 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .doc-header-left p { font-size: 14px; color: #555; }
+    .doc-header-right { text-align: right; font-size: 12px; color: #444; line-height: 1.8; }
+    .doc-header-right strong { color: #666; }
+
+    /* ─── LEGEND ─── */
+    .legend { display: flex; gap: 16px; margin-bottom: 48px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #888; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-unique { background: #2ecc71; }
+    .dot-template { background: #3498db; }
+    .dot-global { background: #f1c40f; }
+    .dot-optional { background: #555; border: 1px solid #666; }
+    .dot-feature { background: #9b59b6; }
+
+    /* ─── SECTION HEADINGS ─── */
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: #444;
+      margin-bottom: 20px; margin-top: 56px;
+      padding-bottom: 10px; border-bottom: 1px solid #141414;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title:first-of-type { margin-top: 0; }
+
+    /* ─── PAGE BLOCK ─── */
+    .page-block {
+      background: #0f0f0f;
+      border: 1px solid #1c1c1c;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .page-block-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #161616;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .page-block-header h2 { font-size: 16px; font-weight: 700; color: #fff; }
+    .page-block-header .url { font-size: 12px; color: #444; font-family: monospace; }
+    .type-badge {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+      padding: 3px 9px; border-radius: 4px; margin-left: auto;
+    }
+    .badge-unique  { background: #0d2b1a; color: #2ecc71; border: 1px solid #1a4a2e; }
+    .badge-template{ background: #0d1a2b; color: #3498db; border: 1px solid #1a2e4a; }
+    .badge-global  { background: #1e1a00; color: #f1c40f; border: 1px solid #4a4200; }
+    .badge-optional{ background: #1a1a1a; color: #888;    border: 1px solid #333; }
+    .badge-feature { background: #1a0d2b; color: #9b59b6; border: 1px solid #2e1a4a; }
+
+    .page-block-body { padding: 24px; }
+
+    /* ─── SCREENSHOT + WIREFRAME LAYOUT ─── */
+    .page-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .page-layout.full { grid-template-columns: 1fr; }
+    .screen-wrap { position: relative; }
+    .screen-wrap img {
+      width: 100%; border-radius: 8px;
+      border: 1px solid #1e1e1e;
+      display: block;
+    }
+    .screen-label {
+      font-size: 11px; color: #444; margin-top: 8px; text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── WIREFRAME SECTIONS ─── */
+    .sections-list { display: flex; flex-direction: column; gap: 6px; }
+    .wf-section {
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .wf-section.repeat { border-color: #131313; opacity: 0.65; }
+    .wf-num { font-size: 11px; color: #333; font-family: monospace; min-width: 18px; padding-top: 1px; }
+    .wf-body { flex: 1; }
+    .wf-name { font-size: 13px; font-weight: 600; color: #ccc; margin-bottom: 2px; }
+    .wf-section.repeat .wf-name { color: #666; }
+    .wf-desc { font-size: 12px; color: #555; }
+    .wf-tags { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+    .wf-tag {
+      font-size: 10px; padding: 1px 7px; border-radius: 3px;
+      background: #111; border: 1px solid #222; color: #555;
+    }
+    .wf-tag.data { background: #0d1a2b; border-color: #1a2e4a; color: #3498db; }
+    .wf-tag.repeat { background: #1a1a0d; border-color: #333; color: #666; }
+    .wf-tag.new    { background: #1a0d2b; border-color: #2e1a4a; color: #9b59b6; }
+
+    /* ─── COMPONENT GRID ─── */
+    .comp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .comp-card {
+      background: #0a0a0a; border: 1px solid #1a1a1a;
+      border-radius: 8px; padding: 14px 16px;
+    }
+    .comp-card h4 { font-size: 13px; font-weight: 700; color: #ddd; margin-bottom: 8px; }
+    .comp-card ul { list-style: none; }
+    .comp-card ul li { font-size: 12px; color: #666; padding: 2px 0 2px 12px; position: relative; }
+    .comp-card ul li::before { content: '—'; position: absolute; left: 0; color: #333; }
+
+    /* ─── FEATURE BLOCK ─── */
+    .feature-block {
+      background: #0f0f0f; border: 1px solid #1c1c1c;
+      border-radius: 12px; margin-bottom: 24px; overflow: hidden;
+    }
+    .feature-header {
+      padding: 18px 24px; border-bottom: 1px solid #161616;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .feature-header h2 { font-size: 16px; font-weight: 700; color: #fff; }
+    .feature-body { padding: 24px; }
+    .feature-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+
+    /* ─── FLOW STEPS ─── */
+    .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 14px 0; }
+    .flow-step {
+      background: #111; border: 1px solid #222;
+      border-radius: 4px; padding: 5px 12px;
+      font-size: 12px; color: #aaa;
+    }
+    .flow-arrow { color: #333; font-size: 13px; }
+
+    /* ─── EMOJI TAG SYSTEM ─── */
+    .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .etag {
+      background: #111; border: 1px solid #1e1e1e;
+      border-radius: 5px; padding: 6px 12px;
+      font-size: 13px; color: #ddd;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .etag-desc { font-size: 11px; color: #555; }
+
+    /* ─── NOTE BOX ─── */
+    .note {
+      background: #0d1a2b; border: 1px solid #1a2e4a;
+      border-radius: 6px; padding: 12px 16px;
+      font-size: 13px; color: #5a8fc2; margin-top: 14px;
+      line-height: 1.5;
+    }
+    .note strong { color: #7aafd4; }
+
+    /* ─── OPEN QUESTIONS ─── */
+    .open-q-list { display: flex; flex-direction: column; gap: 6px; }
+    .open-q {
+      background: #160d0d; border: 1px solid #2b1414;
+      border-radius: 6px; padding: 10px 16px;
+      font-size: 13px; color: #c0624e;
+      display: flex; gap: 10px;
+    }
+    .open-q-num { color: #5a2a2a; font-size: 11px; min-width: 18px; padding-top: 2px; }
+
+    /* ─── FOOTER ─── */
+    .doc-footer {
+      margin-top: 72px; padding-top: 20px;
+      border-top: 1px solid #141414;
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: #333;
+    }
+
+    @media (max-width: 720px) {
+      .page-layout, .feature-layout { grid-template-columns: 1fr; }
+      .comp-grid { grid-template-columns: repeat(2, 1fr); }
+      .doc-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ══ HEADER ══ -->
+  <div class="doc-header">
+    <div class="doc-header-left">
+      <h1>AI Land — Site Structure</h1>
+      <p>Структура сайту з прикладами візуалу · Other Land</p>
+    </div>
+    <div class="doc-header-right">
+      <strong>webf.love</strong><br>
+      23.03.2026<br>
+      v1.0
+    </div>
+  </div>
+
+  <!-- ══ LEGEND ══ -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot dot-unique"></div> Унікальна сторінка</div>
+    <div class="legend-item"><div class="legend-dot dot-template"></div> Шаблон × N</div>
+    <div class="legend-item"><div class="legend-dot dot-global"></div> Глобальний компонент</div>
+    <div class="legend-item"><div class="legend-dot dot-feature"></div> Фіча / Інтерактивний блок</div>
+    <div class="legend-item"><div class="legend-dot dot-optional"></div> Опціонально (v2)</div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       GLOBAL COMPONENTS
+  ══════════════════════════════════════════ -->
+  <div class="section-title">Глобальні компоненти</div>
+
+  <div class="page-block">
+    <div class="page-block-header">
+      <h2>Navigation</h2>
+      <span class="url">присутня на всіх сторінках</span>
+      <span class="type-badge badge-global">Глобальний</span>
+    </div>
+    <div class="page-block-body">
+      <div class="page-layout">
+        <div class="screen-wrap">
+          <img src="prototype-main.png" alt="Nav screenshot" style="max-height:120px;object-fit:cover;object-position:top;">
+          <div class="screen-label">З прототипу</div>
+        </div>
+        <div class="sections-list">
+          <div class="wf-section">
+            <div class="wf-num">L</div>
+            <div class="wf-body">
+              <div class="wf-name">Логотип / Бренд</div>
+              <div class="wf-desc">Зелений квадрат "AI" + назва "AI Land". Клік → Homepage.</div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">C</div>
+            <div class="wf-body">
+              <div class="wf-name">Search Bar</div>
+              <div class="wf-desc">"Find an AI tool..." · placeholder · shortcut ⌘K · відкриває Search Modal</div>
+              <div class="wf-tags">
+                <span class="wf-tag new">→ Search Modal</span>
+              </div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">R</div>
+            <div class="wf-body">
+              <div class="wf-name">Submit Tool CTA</div>
+              <div class="wf-desc">Зелена кнопка. Клік → /submit сторінка.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-block">
+    <div class="page-block-header">
+      <h2>Footer</h2>
+      <span class="url">присутній на всіх сторінках</span>
+      <span class="type-badge badge-global">Глобальний</span>
+    </div>
+    <div class="page-block-body">
+      <div class="sections-list">
+        <div class="wf-section">
+          <div class="wf-num">L</div>
+          <div class="wf-body">
+            <div class="wf-name">Credit рядок</div>
+            <div class="wf-desc">"Curated with love by Other Land studio" — лінк на otherland.studio</div>
+          </div>
+        </div>
+        <div class="wf-section">
+          <div class="wf-num">R</div>
+          <div class="wf-body">
+            <div class="wf-name">Навігаційні лінки</div>
+            <div class="wf-desc">About · Sponsor · Submit ↗</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       HOMEPAGE
+  ══════════════════════════════════════════ -->
+  <div class="section-title">Сторінки</div>
+
+  <div class="page-block">
+    <div class="page-block-header">
+      <h2>Homepage</h2>
+      <span class="url">/</span>
+      <span class="type-badge badge-unique">Унікальна</span>
+    </div>
+    <div class="page-block-body">
+      <div class="page-layout">
+
+        <div class="screen-wrap">
+          <img src="prototype-main.png" alt="Homepage">
+          <div class="screen-label">Прототип — ai-land-ol-directory.vercel.app</div>
+        </div>
+
+        <div class="sections-list">
+          <div class="wf-section">
+            <div class="wf-num">01</div>
+            <div class="wf-body">
+              <div class="wf-name">Hero Block</div>
+              <div class="wf-desc">H1 "Discover AI tools that actually work" · підзаголовок · статистика</div>
+              <div class="wf-tags">
+                <span class="wf-tag data">tools count</span>
+                <span class="wf-tag data">categories count</span>
+              </div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">02</div>
+            <div class="wf-body">
+              <div class="wf-name">Category Filter Tabs</div>
+              <div class="wf-desc">11 категорій: Latest · Assistants · Writing & Content · Creativity & Design · Development · Research & Analytics · Product Management · Productivity · Marketing · Sales · Hiring & HR</div>
+              <div class="wf-tags">
+                <span class="wf-tag">client-side filter</span>
+                <span class="wf-tag">без перезавантаження</span>
+              </div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">03</div>
+            <div class="wf-body">
+              <div class="wf-name">Section Header</div>
+              <div class="wf-desc">"All Tools" / назва категорії + каунтер кількості тулів</div>
+              <div class="wf-tags">
+                <span class="wf-tag data">tools count</span>
+              </div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">04</div>
+            <div class="wf-body">
+              <div class="wf-name">Tool Grid</div>
+              <div class="wf-desc">4 колонки desktop · 2 tablet · 1 mobile. Tool Card × N.</div>
+              <div class="wf-tags">
+                <span class="wf-tag new">→ Tool Card компонент</span>
+                <span class="wf-tag data">tools[]</span>
+              </div>
+            </div>
+          </div>
+          <div class="wf-section repeat">
+            <div class="wf-num">—</div>
+            <div class="wf-body">
+              <div class="wf-name">Empty State</div>
+              <div class="wf-desc">При відсутності результатів (пошук / категорія)</div>
+              <div class="wf-tags"><span class="wf-tag repeat">repeat state</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       TOOL DETAIL PAGE
+  ══════════════════════════════════════════ -->
+  <div class="page-block">
+    <div class="page-block-header">
+      <h2>Tool Detail Page</h2>
+      <span class="url">/tools/[slug]</span>
+      <span class="type-badge badge-template">Шаблон × N</span>
+    </div>
+    <div class="page-block-body">
+      <div class="page-layout">
+
+        <div class="screen-wrap">
+          <img src="tool-detail-full.png" alt="Tool Detail">
+          <div class="screen-label">Прототип — Midjourney detail page</div>
+        </div>
+
+        <div class="sections-list">
+          <div class="wf-section">
+            <div class="wf-num">01</div>
+            <div class="wf-body">
+              <div class="wf-name">Back Navigation</div>
+              <div class="wf-desc">← Back · повертає на попередню сторінку</div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">02</div>
+            <div class="wf-body">
+              <div class="wf-name">Tool Cover</div>
+              <div class="wf-desc">Градієнтний прямокутник (унікальний колір per тул) · назва тулу по центру великим шрифтом</div>
+              <div class="wf-tags">
+                <span class="wf-tag data">name</span>
+                <span class="wf-tag data">cover_color</span>
+              </div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">03</div>
+            <div class="wf-body">
+              <div class="wf-name">Tool Meta Row</div>
+              <div class="wf-desc">H1 назва · тег категорії · ціновий badge (зелений) · "Added X days ago"</div>
+              <div class="wf-tags">
+                <span class="wf-tag data">name</span>
+                <span class="wf-tag data">category</span>
+                <span class="wf-tag data">price_label</span>
+                <span class="wf-tag data">created_at</span>
+              </div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">04</div>
+            <div class="wf-body">
+              <div class="wf-name">Опис</div>
+              <div class="wf-desc">2-3 речення, розгорнуто. Без ELI5 формату — нормальний опис для фахівця.</div>
+              <div class="wf-tags"><span class="wf-tag data">description</span></div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">05</div>
+            <div class="wf-body">
+              <div class="wf-name">ELI5 Block</div>
+              <div class="wf-desc">🙃 "EXPLAIN LIKE I'M 5" · цитата курсивом у лапках · легке пояснення без жаргону</div>
+              <div class="wf-tags"><span class="wf-tag data">eli5</span></div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">06</div>
+            <div class="wf-body">
+              <div class="wf-name">Emoji Tags</div>
+              <div class="wf-desc">До 3-х тегів із системи (Creative / Popular / Pro-level / Fast / Beginner / Team / Pricey / New)</div>
+              <div class="wf-tags"><span class="wf-tag data">tags[]</span></div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">07</div>
+            <div class="wf-body">
+              <div class="wf-name">Use Cases</div>
+              <div class="wf-desc">Заголовок "USE CASES" · 5-6 конкретних юз кейсів у вигляді тегів-пілюль</div>
+              <div class="wf-tags"><span class="wf-tag data">use_cases[]</span></div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">08</div>
+            <div class="wf-body">
+              <div class="wf-name">CTA Row</div>
+              <div class="wf-desc">"Visit Website →" (primary) · "💬 How can this help me?" (secondary)</div>
+              <div class="wf-tags">
+                <span class="wf-tag data">website_url</span>
+                <span class="wf-tag new">→ How can this help me? фіча</span>
+              </div>
+            </div>
+          </div>
+          <div class="wf-section">
+            <div class="wf-num">09</div>
+            <div class="wf-body">
+              <div class="wf-name">Related Tools</div>
+              <div class="wf-desc">"More in [Category]" · горизонтальний скрол з Tool Card-ами тієї ж категорії</div>
+              <div class="wf-tags">
+                <span class="wf-tag data">tools[] by category</span>
+                <span class="wf-tag new">→ Tool Card компонент</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       SUBMIT TOOL PAGE
+  ══════════════════════════════════════════ -->
+  <div class="page-block">
+    <div class="page-block-header">
+      <h2>Submit Tool</h2>
+      <span class="url">/submit</span>
+      <span class="type-badge badge-unique">Унікальна</span>
+    </div>
+    <div class="page-block-body">
+      <div class="sections-list">
+        <div class="wf-section">
+          <div class="wf-num">01</div>
+          <div class="wf-body">
+            <div class="wf-name">Page Header</div>
+            <div class="wf-desc">Заголовок + пояснення що відбувається після подання заявки</div>
+          </div>
+        </div>
+        <div class="wf-section">
+          <div class="wf-num">02</div>
+          <div class="wf-body">
+            <div class="wf-name">Submission Form</div>
+            <div class="wf-desc">Поля: Tool Name · Website URL · Short description (max 280) · Category (dropdown) · Pricing model · Your name (opt.) · Your email (opt.)</div>
+            <div class="wf-tags">
+              <span class="wf-tag">валідація URL</span>
+              <span class="wf-tag">honeypot spam-захист</span>
+              <span class="wf-tag data">→ Make.com webhook</span>
+            </div>
+          </div>
+        </div>
+        <div class="wf-section">
+          <div class="wf-num">03</div>
+          <div class="wf-body">
+            <div class="wf-name">Success State</div>
+            <div class="wf-desc">"Thanks! We'll review your submission within a few days." · Форма очищається</div>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        <strong>Автоматизація:</strong> Після відправки Make.com отримує дані, збагачує через Claude API (ELI5, теги, use cases), і надсилає в Telegram канал з позначкою <strong>[USER SUBMITTED]</strong>. Команда ставить реакцію → тул публікується.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       ABOUT / SPONSOR (OPTIONAL)
+  ══════════════════════════════════════════ -->
+  <div class="page-block">
+    <div class="page-block-header">
+      <h2>About / Sponsor</h2>
+      <span class="url">/about · /sponsor</span>
+      <span class="type-badge badge-optional">Опціонально</span>
+    </div>
+    <div class="page-block-body">
+      <div class="sections-list">
+        <div class="wf-section">
+          <div class="wf-num">01</div>
+          <div class="wf-body">
+            <div class="wf-name">About: Про проект</div>
+            <div class="wf-desc">Місія AI Land · команда Other Land · чому куратований а не агрегатор</div>
+          </div>
+        </div>
+        <div class="wf-section">
+          <div class="wf-num">02</div>
+          <div class="wf-body">
+            <div class="wf-name">Sponsor: Умови спонсорства</div>
+            <div class="wf-desc">Що включає спонсорство · ціна · CTA для звернення</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       FEATURES
+  ══════════════════════════════════════════ -->
+  <div class="section-title">Фічі / Інтерактивні блоки</div>
+
+  <!-- Feature: How can this help me -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <span class="type-badge badge-feature">Фіча</span>
+      <h2>💬 "How can this help me?"</h2>
+    </div>
+    <div class="feature-body">
+      <div class="feature-layout">
+        <div>
+          <div class="screen-wrap">
+            <img src="reference-discuss-ai.png" alt="Reference">
+            <div class="screen-label">Референс — thegradient.com · "Discuss with your AI"</div>
+          </div>
+        </div>
+        <div>
+          <p style="color:#888;font-size:13px;margin-bottom:14px;">Кнопка присутня на кожній Tool Detail сторінці. Генерує контекстний промпт і відкриває вибраний AI асистент.</p>
+
+          <div class="flow">
+            <span class="flow-step">💬 Кнопка на detail сторінці</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">Вибір асистента</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">Новий таб з pre-filled промптом</span>
+          </div>
+
+          <div class="sections-list" style="margin-top:16px;">
+            <div class="wf-section">
+              <div class="wf-body">
+                <div class="wf-name">Асистенти</div>
+                <div class="wf-desc">ChatGPT · Claude · Perplexity</div>
+              </div>
+            </div>
+            <div class="wf-section">
+              <div class="wf-body">
+                <div class="wf-name">Формат промпту</div>
+                <div class="wf-desc">"I want to understand how [Tool Name] can help me. Here's what this tool does: [description]. Use cases: [use_cases]. Help me understand: is this relevant for my work? How to start? Realistic expectations?"</div>
+                <div class="wf-tags">
+                  <span class="wf-tag data">name</span>
+                  <span class="wf-tag data">description</span>
+                  <span class="wf-tag data">use_cases[]</span>
+                </div>
+              </div>
+            </div>
+            <div class="wf-section">
+              <div class="wf-body">
+                <div class="wf-name">Технічна реалізація</div>
+                <div class="wf-desc">Чисто фронтенд · URL-encode промпту · window.open() до відповідного сервісу. Без API викликів.</div>
+                <div class="wf-tags">
+                  <span class="wf-tag">ChatGPT: chat.openai.com/?q=</span>
+                  <span class="wf-tag">Claude: claude.ai/new?q=</span>
+                  <span class="wf-tag">Perplexity: perplexity.ai/?q=</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature: Search -->
+  <div class="feature-block">
+    <div class="feature-header">
+      <span class="type-badge badge-feature">Фіча</span>
+      <h2>⌘K Search Modal</h2>
+    </div>
+    <div class="feature-body">
+      <div class="flow">
+        <span class="flow-step">⌘K або клік на Search Bar</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Modal overlay відкривається</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Typing → результати в реальному часі</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-step">Клік на результат → Tool Detail</span>
+      </div>
+      <div class="sections-list" style="margin-top:16px;">
+        <div class="wf-section">
+          <div class="wf-body">
+            <div class="wf-name">Пошук по полях</div>
+            <div class="wf-desc">name · description · eli5 · use_cases — full-text індекс</div>
+          </div>
+        </div>
+        <div class="wf-section">
+          <div class="wf-body">
+            <div class="wf-name">Фільтрація</div>
+            <div class="wf-desc">По категорії · по тегах (опц.)</div>
+          </div>
+        </div>
+        <div class="wf-section">
+          <div class="wf-body">
+            <div class="wf-name">Технологія</div>
+            <div class="wf-desc">Supabase PostgreSQL full-text search (tsvector). НЕ LLM. Debounce 300ms.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       COMPONENT LIBRARY
+  ══════════════════════════════════════════ -->
+  <div class="section-title">Компоненти</div>
+
+  <!-- Tool Card -->
+  <div class="page-block" style="margin-bottom:16px;">
+    <div class="page-block-header">
+      <h2>Tool Card</h2>
+      <span style="font-size:12px;color:#444;">використовується на Homepage + Related Tools</span>
+    </div>
+    <div class="page-block-body">
+      <div class="page-layout">
+        <div class="screen-wrap">
+          <img src="prototype-main.png" alt="Tool Cards" style="max-height:300px;object-fit:cover;object-position:center;">
+          <div class="screen-label">Приклади карток: Midjourney, Cursor, Perplexity, Runway</div>
+        </div>
+        <div>
+          <div class="sections-list">
+            <div class="wf-section">
+              <div class="wf-num">T</div>
+              <div class="wf-body">
+                <div class="wf-name">Cover Area</div>
+                <div class="wf-desc">Градієнт (унікальний per тул або per категорія) · назва тулу великим шрифтом по центру</div>
+                <div class="wf-tags">
+                  <span class="wf-tag data">name</span>
+                  <span class="wf-tag data">cover_color</span>
+                </div>
+              </div>
+            </div>
+            <div class="wf-section">
+              <div class="wf-num">M</div>
+              <div class="wf-body">
+                <div class="wf-name">Card Body</div>
+                <div class="wf-desc">Назва тулу · тег категорії (pill) · ELI5 цитата курсивом</div>
+                <div class="wf-tags">
+                  <span class="wf-tag data">name</span>
+                  <span class="wf-tag data">category</span>
+                  <span class="wf-tag data">eli5</span>
+                </div>
+              </div>
+            </div>
+            <div class="wf-section">
+              <div class="wf-num">B</div>
+              <div class="wf-body">
+                <div class="wf-name">Card Footer</div>
+                <div class="wf-desc">Emoji теги (до 3) · ціна праворуч</div>
+                <div class="wf-tags">
+                  <span class="wf-tag data">tags[]</span>
+                  <span class="wf-tag data">price_label</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emoji Tag System -->
+  <div class="page-block">
+    <div class="page-block-header">
+      <h2>Emoji Tag System</h2>
+      <span style="font-size:12px;color:#444;">8 тегів — на картках і detail сторінках</span>
+    </div>
+    <div class="page-block-body">
+      <div class="tag-grid">
+        <div class="etag">🎨 Creative <span class="etag-desc">· творчі задачі</span></div>
+        <div class="etag">🔥 Popular <span class="etag-desc">· широко відомий</span></div>
+        <div class="etag">🧠 Pro-level <span class="etag-desc">· для досвідчених</span></div>
+        <div class="etag">🚀 Fast <span class="etag-desc">· швидкий результат</span></div>
+        <div class="etag">🌱 Beginner <span class="etag-desc">· легко почати</span></div>
+        <div class="etag">👥 Team <span class="etag-desc">· командні функції</span></div>
+        <div class="etag">💰 Pricey <span class="etag-desc">· дорожче середнього</span></div>
+        <div class="etag">✨ New <span class="etag-desc">· нещодавно вийшов</span></div>
+      </div>
+      <div class="note" style="margin-top:16px;">
+        <strong>Генерація тегів:</strong> Claude API автоматично призначає теги при додаванні тулу через weekly pipeline або user submission. Команда може коригувати в Telegram перед апрувом.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       ВІДКРИТІ ПИТАННЯ
+  ══════════════════════════════════════════ -->
+  <div class="section-title">Відкриті питання — потрібні до старту</div>
+
+  <div class="open-q-list">
+    <div class="open-q"><span class="open-q-num">01</span>Figma-файл дизайну готовий до старту — чи розробляємо по прототипу і замінюємо пізніше?</div>
+    <div class="open-q"><span class="open-q-num">02</span>Прев'ю тулу: автоматичний скріншот сайту — чи лого/зображення вручну? (впливає на pipeline)</div>
+    <div class="open-q"><span class="open-q-num">03</span>Джерела для weekly research: Product Hunt? Конкретні сайти? Соцмережі?</div>
+    <div class="open-q"><span class="open-q-num">04</span>Telegram канал і бот вже створені — чи робимо з нуля?</div>
+    <div class="open-q"><span class="open-q-num">05</span>Стартовий контент: хто і як завантажує перші 50-150 тулів для launch?</div>
+    <div class="open-q"><span class="open-q-num">06</span>ELI5 і теги — Claude генерує і публікує as-is, чи команда може редагувати в Telegram перед реакцією?</div>
+  </div>
+
+
+  <!-- ══ DOC FOOTER ══ -->
+  <div class="doc-footer">
+    <span><strong style="color:#555;">webf.love</strong> · Site Structure v1.0</span>
+    <span>AI Land × Other Land · 23.03.2026</span>
+  </div>
+
+</div>
+</body>
+</html>

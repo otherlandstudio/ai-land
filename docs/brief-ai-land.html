@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Land — Brief Analysis · webf.love</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #e8e8e8;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 820px; margin: 0 auto; padding: 60px 24px; }
+
+    /* Header */
+    .header { margin-bottom: 56px; padding-bottom: 32px; border-bottom: 1px solid #222; }
+    .header-meta { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #555; margin-bottom: 16px; }
+    .header h1 { font-size: 32px; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 8px; }
+    .header .sub { font-size: 16px; color: #888; }
+    .badge-row { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+    .badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; }
+    .badge-green { background: #0d2b1a; color: #2ecc71; border: 1px solid #1a4a2e; }
+    .badge-orange { background: #2b1a0d; color: #e67e22; border: 1px solid #4a2e1a; }
+    .badge-blue { background: #0d1a2b; color: #3498db; border: 1px solid #1a2e4a; }
+    .badge-purple { background: #1a0d2b; color: #9b59b6; border: 1px solid #2e1a4a; }
+
+    /* Sections */
+    section { margin-bottom: 48px; }
+    h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #555; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid #1a1a1a; }
+    h3 { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 8px; margin-top: 20px; }
+
+    /* Status grid */
+    .status-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .status-card { background: #111; border: 1px solid #1e1e1e; border-radius: 8px; padding: 16px; }
+    .status-card .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; margin-bottom: 8px; }
+    .status-card ul { list-style: none; }
+    .status-card ul li { font-size: 13px; color: #aaa; padding: 3px 0; padding-left: 12px; position: relative; }
+    .status-card ul li::before { content: '·'; position: absolute; left: 0; color: #444; }
+    .confirmed li::before { color: #2ecc71; }
+    .optional li::before { color: #e67e22; }
+    .open li::before { color: #e74c3c; }
+
+    /* Sitemap */
+    .page-card { background: #111; border: 1px solid #1e1e1e; border-radius: 8px; padding: 20px 24px; margin-bottom: 10px; }
+    .page-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .page-name { font-size: 15px; font-weight: 600; color: #fff; }
+    .page-type { font-size: 11px; padding: 2px 8px; border-radius: 3px; font-weight: 600; letter-spacing: 0.04em; }
+    .type-unique { background: #1a2b0d; color: #7dde3c; border: 1px solid #2e4a1a; }
+    .type-template { background: #0d1a2b; color: #3498db; border: 1px solid #1a2e4a; }
+    .type-global { background: #1a1a0d; color: #f1c40f; border: 1px solid #4a4a1a; }
+    .section-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
+    .section-item { font-size: 13px; color: #888; padding: 3px 0 3px 14px; position: relative; }
+    .section-item::before { content: '—'; position: absolute; left: 0; color: #333; font-size: 11px; }
+    .section-item.repeat { color: #555; }
+    .section-item.repeat::after { content: ' ↻'; color: #444; font-size: 10px; }
+    .multiplier { font-size: 12px; color: #555; margin-left: 4px; }
+
+    /* Automation */
+    .flow-card { background: #111; border: 1px solid #1e1e1e; border-radius: 8px; padding: 20px 24px; margin-bottom: 10px; }
+    .flow-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+    .flow-num { font-size: 11px; color: #555; font-weight: 700; letter-spacing: 0.08em; }
+    .flow-title { font-size: 15px; font-weight: 600; color: #fff; }
+    .flow-steps { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .step { background: #161616; border: 1px solid #222; border-radius: 4px; padding: 4px 10px; font-size: 12px; color: #aaa; }
+    .arrow { color: #333; font-size: 12px; }
+    .flow-note { font-size: 13px; color: #666; margin-top: 8px; }
+
+    /* Estimate */
+    .estimate-table { width: 100%; border-collapse: collapse; }
+    .estimate-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; text-align: left; padding: 8px 12px; border-bottom: 1px solid #1e1e1e; }
+    .estimate-table td { padding: 10px 12px; border-bottom: 1px solid #141414; font-size: 14px; color: #aaa; }
+    .estimate-table tr:last-child td { border-bottom: none; }
+    .estimate-table .group { color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; background: #0d0d0d; }
+    .estimate-table .hours { color: #fff; font-weight: 600; white-space: nowrap; }
+    .estimate-table .optional-row td { color: #555; font-style: italic; }
+    .total-row td { background: #111; border-top: 2px solid #222 !important; color: #fff !important; font-weight: 700; font-size: 15px; }
+    .note-tag { font-size: 11px; padding: 1px 6px; border-radius: 3px; background: #1a1a0d; color: #f1c40f; border: 1px solid #3a3a1a; margin-left: 6px; vertical-align: middle; }
+
+    /* Questions */
+    .q-group { margin-bottom: 24px; }
+    .q-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; margin-bottom: 10px; }
+    .q-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid #141414; }
+    .q-item:last-child { border-bottom: none; }
+    .q-num { font-size: 12px; color: #444; min-width: 20px; }
+    .q-text { font-size: 14px; color: #aaa; }
+    .q-critical { color: #e74c3c; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; margin-left: 8px; }
+
+    /* Stack */
+    .stack-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stack-card { background: #111; border: 1px solid #1e1e1e; border-radius: 8px; padding: 14px 18px; }
+    .stack-layer { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; margin-bottom: 6px; }
+    .stack-tech { font-size: 14px; color: #fff; font-weight: 600; }
+    .stack-why { font-size: 12px; color: #666; margin-top: 4px; }
+
+    /* Footer */
+    .doc-footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; }
+    .doc-footer .brand { font-size: 13px; color: #444; }
+    .doc-footer .brand strong { color: #666; }
+    .doc-footer .date { font-size: 12px; color: #333; }
+
+    /* Total block */
+    .total-block { background: #111; border: 1px solid #2a2a2a; border-radius: 12px; padding: 24px 28px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; }
+    .total-label { font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; }
+    .total-range { font-size: 36px; font-weight: 800; color: #fff; }
+    .total-sub { font-size: 13px; color: #555; margin-top: 4px; }
+
+    @media (max-width: 600px) {
+      .status-grid, .section-list, .stack-grid { grid-template-columns: 1fr; }
+      .total-block { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-meta">webf.love · Brief Analysis · 23.03.2026</div>
+    <h1>AI Land</h1>
+    <div class="sub">Курований директорій АІ тулів — Other Land</div>
+    <div class="badge-row">
+      <span class="badge badge-green">Сайт + CMS</span>
+      <span class="badge badge-orange">Автоматизація</span>
+      <span class="badge badge-blue">Telegram Workflow</span>
+      <span class="badge badge-purple">Дизайн від клієнта</span>
+    </div>
+  </div>
+
+  <!-- Scope overview -->
+  <section>
+    <h2>Що є в скоупі</h2>
+    <div class="status-grid">
+      <div class="status-card confirmed">
+        <div class="label">✓ Підтверджено</div>
+        <ul>
+          <li>Директорій АІ тулів</li>
+          <li>11 категорій</li>
+          <li>Tool detail сторінки</li>
+          <li>Submit Tool форма</li>
+          <li>Weekly research pipeline</li>
+          <li>Telegram approval workflow</li>
+          <li>Реакція = публікація</li>
+          <li>"How can this help me?" CTA</li>
+          <li>SQL-пошук (не LLM)</li>
+          <li>Дизайн від клієнта</li>
+        </ul>
+      </div>
+      <div class="status-card optional">
+        <div class="label">~ Опціонально</div>
+        <ul>
+          <li>Окремі сторінки категорій</li>
+          <li>Sponsor сторінка</li>
+          <li>About сторінка</li>
+          <li>Screenshot автоматично</li>
+          <li>Email backup нотифікації</li>
+          <li>Пагінація / infinite scroll</li>
+          <li>Фільтр по ціні/тегах</li>
+          <li>Admin панель</li>
+        </ul>
+      </div>
+      <div class="status-card open">
+        <div class="label">? Відкрито / уточнити</div>
+        <ul>
+          <li>Платформа: Webflow vs Next.js</li>
+          <li>БД: Webflow CMS vs Supabase</li>
+          <li>Звідки research: які джерела?</li>
+          <li>Прев'ю: скрін чи лого?</li>
+          <li>Дизайн-файл до старту?</li>
+          <li>Хто генерує ELI5 опис?</li>
+          <li>Дедлайн чи пріоритет?</li>
+          <li>Бюджет на API (Claude/Make)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sitemap -->
+  <section>
+    <h2>Архітектура сайту</h2>
+
+    <div class="page-card">
+      <div class="page-card-header">
+        <span class="page-name">Global Components</span>
+        <span class="page-type type-global">Глобальний</span>
+      </div>
+      <div class="section-list">
+        <div class="section-item">Навігація (Logo, Search ⌘K, Submit CTA)</div>
+        <div class="section-item">Footer (About, Sponsor, Submit)</div>
+        <div class="section-item">Search Modal / Command Palette</div>
+        <div class="section-item">"How can this help me?" — Modal / Logic</div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <div class="page-card-header">
+        <span class="page-name">Homepage</span>
+        <span class="page-type type-unique">Унікальна</span>
+      </div>
+      <div class="section-list">
+        <div class="section-item">Hero (заголовок, підзаголовок, stats)</div>
+        <div class="section-item">Category Filter Tabs (11 категорій)</div>
+        <div class="section-item">Tool Grid (4 колонки, адаптив)</div>
+        <div class="section-item">Tool Card компонент (градієнт, теги, ціна)</div>
+        <div class="section-item repeat">Empty state (при пошуку)</div>
+        <div class="section-item repeat">Loading skeleton</div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <div class="page-card-header">
+        <span class="page-name">Tool Detail Page</span>
+        <span class="page-type type-template">Шаблон × N</span>
+        <span style="font-size:12px;color:#555">один шаблон для всіх тулів</span>
+      </div>
+      <div class="section-list">
+        <div class="section-item">Cover (градієнт + назва тулу)</div>
+        <div class="section-item">Tool Meta (категорія, ціна, дата)</div>
+        <div class="section-item">Опис (розгорнутий)</div>
+        <div class="section-item">ELI5 Block ("Explain Like I'm 5")</div>
+        <div class="section-item">Tags (Creative, Popular, etc.)</div>
+        <div class="section-item">Use Cases (список)</div>
+        <div class="section-item">CTA (Visit Website + How can this help me?)</div>
+        <div class="section-item">"More in Category" (related tools)</div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <div class="page-card-header">
+        <span class="page-name">Submit Tool Page</span>
+        <span class="page-type type-unique">Унікальна</span>
+      </div>
+      <div class="section-list">
+        <div class="section-item">Форма (назва, URL, опис, категорія, ціна)</div>
+        <div class="section-item">Success state після відправки</div>
+        <div class="section-item">Валідація полів</div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <div class="page-card-header">
+        <span class="page-name">About / Sponsor</span>
+        <span class="page-type type-unique">Унікальна</span>
+        <span style="font-size:12px;color:#555">опціонально</span>
+      </div>
+      <div class="section-list">
+        <div class="section-item">Про проект та Other Land</div>
+        <div class="section-item">Sponsor info + CTA</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Automation -->
+  <section>
+    <h2>Автоматизація — флоу</h2>
+
+    <div class="flow-card">
+      <div class="flow-header">
+        <span class="flow-num">PIPELINE 01</span>
+        <span class="flow-title">Weekly Research → Telegram → Publish</span>
+      </div>
+      <div class="flow-steps">
+        <span class="step">⏰ Щотижневий тригер</span>
+        <span class="arrow">→</span>
+        <span class="step">🔍 Пошук нових AI тулів</span>
+        <span class="arrow">→</span>
+        <span class="step">🤖 Claude API: опис, ELI5, теги, юз кейси</span>
+        <span class="arrow">→</span>
+        <span class="step">📸 Screenshot прев'ю</span>
+        <span class="arrow">→</span>
+        <span class="step">📲 Telegram повідомлення</span>
+        <span class="arrow">→</span>
+        <span class="step">👍 Реакція команди</span>
+        <span class="arrow">→</span>
+        <span class="step">✅ Авто-публікація на сайті</span>
+      </div>
+      <div class="flow-note">Оркестрація: Make.com · Зберігання: Supabase або Airtable · Скрін: ScreenshotOne API або Playwright</div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-header">
+        <span class="flow-num">PIPELINE 02</span>
+        <span class="flow-title">User Submission → Telegram → Publish</span>
+      </div>
+      <div class="flow-steps">
+        <span class="step">📝 Submit Tool форма</span>
+        <span class="arrow">→</span>
+        <span class="step">🤖 Auto-enrich (Claude API)</span>
+        <span class="arrow">→</span>
+        <span class="step">📲 Telegram [USER SUBMITTED]</span>
+        <span class="arrow">→</span>
+        <span class="step">👍 Реакція = approved</span>
+        <span class="arrow">→</span>
+        <span class="step">✅ Публікація на сайті</span>
+      </div>
+      <div class="flow-note">Той самий Telegram канал, інша позначка. Помилкові submission фільтруються до відправки в Telegram.</div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-header">
+        <span class="flow-num">FEATURE 01</span>
+        <span class="flow-title">"How can this help me?" — Discuss with AI</span>
+      </div>
+      <div class="flow-steps">
+        <span class="step">💬 Кнопка на detail сторінці</span>
+        <span class="arrow">→</span>
+        <span class="step">Генерується промпт з контекстом тулу</span>
+        <span class="arrow">→</span>
+        <span class="step">ChatGPT / Claude / Perplexity</span>
+      </div>
+      <div class="flow-note">Референс: thegradient.com — кнопки внизу статті "Discuss with your AI". Логіка на фронтенді, без API.</div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-header">
+        <span class="flow-num">FEATURE 02</span>
+        <span class="flow-title">Search — SQL фільтрація</span>
+      </div>
+      <div class="flow-steps">
+        <span class="step">⌘K пошук</span>
+        <span class="arrow">→</span>
+        <span class="step">Full-text search по назві, опису, юз кейсам</span>
+        <span class="arrow">→</span>
+        <span class="step">Фільтр по категорії / тегах</span>
+        <span class="arrow">→</span>
+        <span class="step">Результати в реальному часі</span>
+      </div>
+      <div class="flow-note">Supabase full-text search або Algolia (залежно від БД). Не LLM.</div>
+    </div>
+  </section>
+
+  <!-- Proposed stack -->
+  <section>
+    <h2>Рекомендований стек</h2>
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="stack-layer">Сайт</div>
+        <div class="stack-tech">Next.js + Vercel</div>
+        <div class="stack-why">Прототип вже на Next.js. Потрібні динамічні маршрути, SSR, API routes — Webflow тут надто обмежений.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-layer">База даних / CMS</div>
+        <div class="stack-tech">Supabase</div>
+        <div class="stack-why">PostgreSQL full-text search, REST API для Make.com, реальний час. Airtable — як альтернатива якщо простіше для команди.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-layer">Автоматизація</div>
+        <div class="stack-tech">Make.com</div>
+        <div class="stack-why">Visual workflow, Telegram модуль, Supabase connector, Claude API. n8n — як self-hosted альтернатива.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-layer">AI Research</div>
+        <div class="stack-tech">Claude API + Perplexity API</div>
+        <div class="stack-why">Claude для генерації описів/ELI5/тегів. Perplexity для пошуку нових тулів по актуальним джерелам.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-layer">Скріншоти</div>
+        <div class="stack-tech">ScreenshotOne API</div>
+        <div class="stack-why">Простий API для screenshot по URL. $19/mo для weekly обсягів. Зберігаємо в Supabase Storage.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-layer">Telegram Bot</div>
+        <div class="stack-tech">Telegram Bot API + Make.com</div>
+        <div class="stack-why">Make.com слухає реакції через Telegram trigger. Reaction → webhook → Supabase update → publish.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Estimate -->
+  <section>
+    <h2>Естімейт</h2>
+    <table class="estimate-table">
+      <thead>
+        <tr>
+          <th>Блок роботи</th>
+          <th>Деталі</th>
+          <th>Год.</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="3" class="group">САЙТ / ФРОНТЕНД</td></tr>
+        <tr>
+          <td>Глобальні компоненти</td>
+          <td>Nav, Footer, Search modal, "How can this help me?" логіка</td>
+          <td class="hours">6–10</td>
+        </tr>
+        <tr>
+          <td>Homepage</td>
+          <td>Hero, category tabs, tool grid, tool card компонент</td>
+          <td class="hours">8–12</td>
+        </tr>
+        <tr>
+          <td>Tool Detail Page</td>
+          <td>Шаблон: cover, мета, ELI5, юз кейси, CTAs, related</td>
+          <td class="hours">6–10</td>
+        </tr>
+        <tr>
+          <td>Submit Tool форма</td>
+          <td>Форма, валідація, success state</td>
+          <td class="hours">4–6</td>
+        </tr>
+        <tr>
+          <td>About / Sponsor сторінки</td>
+          <td>Опціонально, прості сторінки</td>
+          <td class="hours">2–4</td>
+        </tr>
+        <tr>
+          <td>Supabase + API інтеграція</td>
+          <td>Schema, CRUD, full-text search, API routes</td>
+          <td class="hours">8–14</td>
+        </tr>
+        <tr><td colspan="3" class="group">АВТОМАТИЗАЦІЯ</td></tr>
+        <tr>
+          <td>Weekly Research Pipeline</td>
+          <td>Make.com + Perplexity + Claude API: пошук → опис → теги → скрін → Telegram</td>
+          <td class="hours">10–18</td>
+        </tr>
+        <tr>
+          <td>Telegram Approval Bot</td>
+          <td>Reaction listener → Supabase update → publish trigger</td>
+          <td class="hours">6–10</td>
+        </tr>
+        <tr>
+          <td>User Submission Flow</td>
+          <td>Форма → Make.com → Telegram з [USER SUBMITTED] маркером</td>
+          <td class="hours">4–6</td>
+        </tr>
+        <tr><td colspan="3" class="group">ОПЦІОНАЛЬНО</td></tr>
+        <tr class="optional-row">
+          <td>Окремі Category Pages</td>
+          <td>Шаблон × 11, якщо потрібні SEO URLs</td>
+          <td class="hours">6–12 <span class="note-tag">опц.</span></td>
+        </tr>
+        <tr class="optional-row">
+          <td>Admin / Review інтерфейс</td>
+          <td>Якщо Telegram буде недостатньо</td>
+          <td class="hours">12–20 <span class="note-tag">опц.</span></td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="2"><strong>Базовий скоуп (без опціональних)</strong></td>
+          <td class="hours">54–90 год</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="total-block">
+      <div>
+        <div class="total-label">Загальний обсяг (базовий скоуп)</div>
+        <div class="total-range">54–90 год</div>
+        <div class="total-sub">Розбивка: ~34–56 год сайт · ~20–34 год автоматизація</div>
+      </div>
+      <div style="text-align:right">
+        <div class="total-sub" style="margin-bottom:4px">Верхня межа — якщо дизайн</div>
+        <div class="total-sub">складніший за прототип або</div>
+        <div class="total-sub">потрібна нестандартна логіка пошуку</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Questions -->
+  <section>
+    <h2>Уточнюючі питання</h2>
+
+    <div class="q-group">
+      <div class="q-label">Критичні — потрібні перед естімейтом</div>
+      <div class="q-item">
+        <span class="q-num">1</span>
+        <span class="q-text">Дизайн-файл (Figma) буде готовий до початку розробки — чи розробляємо паралельно з дизайном? <span class="q-critical">CRITICAL</span></span>
+      </div>
+      <div class="q-item">
+        <span class="q-num">2</span>
+        <span class="q-text">Які джерела для weekly research? Product Hunt, конкретні сайти, соцмережі — чи визначаємо разом? <span class="q-critical">CRITICAL</span></span>
+      </div>
+      <div class="q-item">
+        <span class="q-num">3</span>
+        <span class="q-text">Прев'ю тулу — автоматичний скріншот сайту, або лого/ручне зображення? (впливає на pipeline складність) <span class="q-critical">CRITICAL</span></span>
+      </div>
+    </div>
+
+    <div class="q-group">
+      <div class="q-label">Технічні</div>
+      <div class="q-item">
+        <span class="q-num">4</span>
+        <span class="q-text">Є налаштований Telegram бот/канал, чи створюємо з нуля?</span>
+      </div>
+      <div class="q-item">
+        <span class="q-num">5</span>
+        <span class="q-text">Бюджет на API сервіси (Make.com ~$16/mo, ScreenshotOne ~$19/mo, Claude API ~$20-50/mo)?</span>
+      </div>
+      <div class="q-item">
+        <span class="q-num">6</span>
+        <span class="q-text">Є Supabase / Vercel акаунти, чи налаштовуємо у вас?</span>
+      </div>
+    </div>
+
+    <div class="q-group">
+      <div class="q-label">Скоуп / Контент</div>
+      <div class="q-item">
+        <span class="q-num">7</span>
+        <span class="q-text">ELI5 опис та теги — генерує AI автоматично, чи команда редагує перед публікацією?</span>
+      </div>
+      <div class="q-item">
+        <span class="q-num">8</span>
+        <span class="q-text">Стартовий контент — 150+ тулів потрібно залити вручну, чи ми мігруємо з прототипу?</span>
+      </div>
+      <div class="q-item">
+        <span class="q-num">9</span>
+        <span class="q-text">Чи потрібна можливість редагувати тул після публікації (без Telegram)?</span>
+      </div>
+    </div>
+
+    <div class="q-group">
+      <div class="q-label">Дедлайни</div>
+      <div class="q-item">
+        <span class="q-num">10</span>
+        <span class="q-text">Чи є жорсткий дедлайн або MVP дата, від якої відштовхуватись при пріоритизації?</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <div class="brand"><strong>webf.love</strong> · Brief Analysis</div>
+    <div class="date">23 березня 2026</div>
+  </div>
+
+</div>
+</body>
+</html>
