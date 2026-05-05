@@ -218,47 +218,27 @@ export default function ToolDetailClient({
               </p>
             )}
 
-            {/* use cases — full width */}
+            {/* use cases — chips per Figma 702:2445 (LEAD GENERATION · PRICE MONITORING · …) */}
             {tool.use_cases && tool.use_cases.length > 0 && (
-              <div style={{ marginTop: 32, maxWidth: 760 }}>
-                <div
-                  style={{
-                    ...fontMono,
-                    color: C.textDim,
-                    fontSize: 11,
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    marginBottom: 12,
-                  }}
-                >
-                  Use cases
-                </div>
-                <ul style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {tool.use_cases.map((uc) => (
-                    <li
-                      key={uc}
-                      style={{
-                        color: C.text,
-                        fontSize: 15,
-                        lineHeight: '22px',
-                        paddingLeft: 18,
-                        position: 'relative',
-                      }}
-                    >
-                      <span
-                        style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          color: C.yellow,
-                        }}
-                      >
-                        —
-                      </span>
-                      {uc}
-                    </li>
-                  ))}
-                </ul>
+              <div className="flex flex-wrap" style={{ gap: 6, marginTop: 24 }}>
+                {tool.use_cases.map((uc) => (
+                  <span
+                    key={uc}
+                    className="inline-flex items-center"
+                    style={{
+                      ...fontMono,
+                      fontSize: 11,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: '#9b9b9b',
+                      background: '#141414',
+                      borderRadius: 6,
+                      padding: '6px 12px',
+                    }}
+                  >
+                    {uc}
+                  </span>
+                ))}
               </div>
             )}
           </article>

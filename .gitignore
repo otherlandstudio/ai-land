@@ -47,3 +47,12 @@ automation/.env
 
 # allow env template to be committed
 !.env.example
+
+# Playwright/dev screenshots — single bucket, never scattered across the repo
+/PlayWriteScreen/
+
+# project-local migration artifacts (do not commit)
+/backups/
+/MIGRATION-LOG.md
+/.env.vercel-import
+/vercel-env-import.txt
