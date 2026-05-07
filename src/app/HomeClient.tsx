@@ -193,7 +193,7 @@ function CategoryTabs({ counts }: { counts: Record<string, number> }) {
 
   return (
     <div
-      className="flex flex-nowrap items-center overflow-x-auto"
+      className="flex flex-nowrap items-center overflow-x-auto no-scrollbar"
       style={{ gap: 28, paddingBottom: 4 }}
     >
       <CategoryTab name="All" active={active === ''} onClick={() => select('')} />
