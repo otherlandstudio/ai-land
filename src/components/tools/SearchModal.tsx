@@ -19,8 +19,8 @@ interface SearchModalProps {
 }
 
 const C = {
-  surface: '#15151a',
-  surfaceHover: '#1c1c22',
+  surface: '#141414',
+  surfaceHover: '#1f1f1f',
   border: 'rgba(255,255,255,0.08)',
   borderStrong: 'rgba(255,255,255,0.18)',
   text: '#ffffff',

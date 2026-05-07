@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { CATEGORIES } from '@/lib/types'
-import { getCategoryColor } from '@/lib/utils'
+import { getCategoryColor, cleanDescription } from '@/lib/utils'
 import type { Tool } from '@/lib/types'
 import FloatingSearch from '@/components/tools/FloatingSearch'
 import Pagination from '@/components/tools/Pagination'
@@ -69,12 +69,13 @@ function HomeClientInner({
 
   return (
     <div style={{ background: C.bg, color: C.text, minHeight: '100vh', ...fontSans }}>
-      {/* Submit button — absolute top-right per Figma 702:2260. */}
-      <div className="absolute right-[40px] top-[20px] z-30 hidden md:block">
+      {/* Submit button — absolute top-right per Figma 702:2260. Hidden on mobile,
+          replaced by floating search pill which is mobile-friendly. */}
+      <div className="absolute right-4 top-5 z-30 hidden md:right-[40px] md:block">
         <SubmitToolButton />
       </div>
 
-      <main className="mx-auto" style={{ maxWidth: 1440, paddingLeft: 40, paddingRight: 40 }}>
+      <main className="mx-auto px-4 sm:px-6 lg:px-10" style={{ maxWidth: 1440 }}>
         <Hero totalCount={totalCount} />
 
         <CategoryTabs counts={categoryCounts} />
@@ -137,7 +138,7 @@ function SubmitToolButton() {
         lineHeight: '20px',
         letterSpacing: '0.11em',
         textTransform: 'uppercase',
-        fontWeight: 600,
+        fontWeight: 400,
         transition: 'background-color 220ms cubic-bezier(0.4,0,0.2,1)',
       }}
     >
@@ -152,12 +153,11 @@ function SubmitToolButton() {
 
 function Hero({ totalCount: _totalCount }: { totalCount: number; hideTopWordmark?: boolean }) {
   return (
-    <section style={{ paddingTop: 20, paddingBottom: 168 }}>
+    <section className="pt-5 pb-20 md:pb-[168px]">
       <h1
+        className="text-[22px] leading-[28px] md:text-[28px] md:leading-[32px]"
         style={{
           ...fontSans,
-          fontSize: 28,
-          lineHeight: '32px',
           letterSpacing: 0,
           fontWeight: 600,
           maxWidth: 650,
@@ -281,34 +281,28 @@ function ResultsHeader({
   return (
     <div
       className="flex flex-wrap items-baseline"
-      style={{ marginTop: 24, gap: 10, ...fontSans }}
+      style={{ marginTop: 8, gap: 10, ...fontSans }}
     >
       <h2
         style={{
-          color: C.text,
-          fontSize: 20,
+          ...fontSans,
+          color: C.textDim,
+          fontSize: 24,
           fontWeight: 600,
-          letterSpacing: '-0.01em',
+          letterSpacing: 0,
         }}
       >
         Results for &ldquo;<span style={{ color: C.yellow }}>{query}</span>&rdquo;
-      </h2>
-      <span
-        style={{
-          ...fontMono,
-          color: C.textMuted,
-          fontSize: 12,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-        }}
-      >
-        — {count} {count === 1 ? 'tool' : 'tools'} found
+        <span style={{ color: '#ffffff' }}>
+          {' — '}
+          {count} {count === 1 ? 'tool' : 'tools'} found
+        </span>
         {category && (
-          <>
-            {' '}in <span style={{ color: C.text }}>{category}</span>
-          </>
+          <span style={{ color: C.textDim }}>
+            {' '}in <span style={{ color: '#ffffff' }}>{category}</span>
+          </span>
         )}
-      </span>
+      </h2>
     </div>
   )
 }
@@ -328,18 +322,60 @@ function AILandToolCard({ tool }: { tool: Tool }) {
   const color = getCategoryColor(tool.category)
 
   return (
-    <Link
-      href={`/tools/${tool.slug}`}
+    <div
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className="group relative block"
+      className="group relative"
       style={{
         background: hover ? '#2a2a2a' : '#222222',
         borderRadius: 24,
-        padding: '20px 24px 24px 24px',
         transition: 'background-color 280ms cubic-bezier(0.4,0,0.2,1)',
       }}
     >
+      {/* External-website arrow — positioned absolute so it sits OUTSIDE
+          the <Link>, allowing valid HTML and a separate click target. */}
+      {tool.website_url && (
+        <a
+          href={tool.website_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Open ${tool.name} website`}
+          onClick={(e) => e.stopPropagation()}
+          className="absolute z-10 flex h-[32px] w-[32px] items-center justify-center rounded-full"
+          style={{
+            top: 18,
+            right: 22,
+            color: C.textDim,
+            opacity: hover ? 1 : 0,
+            background: hover ? 'rgba(255,255,255,0.06)' : 'transparent',
+            transform: hover ? 'translate(2px,-2px)' : 'translate(0,0)',
+            transition:
+              'opacity 200ms cubic-bezier(0.4,0,0.2,1), background-color 200ms cubic-bezier(0.4,0,0.2,1), transform 240ms cubic-bezier(0.4,0,0.2,1)',
+            cursor: 'pointer',
+            pointerEvents: hover ? 'auto' : 'none',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path
+              d="M3 11L11 3M5 3h6v6"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </a>
+      )}
+
+      <Link
+        href={`/tools/${tool.slug}`}
+        className="block"
+        style={{
+          padding: '20px 24px 24px 24px',
+          color: 'inherit',
+          textDecoration: 'none',
+        }}
+      >
       {/* category row */}
       <div className="flex items-center justify-between" style={{ marginBottom: 28 }}>
         <div className="inline-flex items-center" style={{ gap: 10 }}>
@@ -364,28 +400,8 @@ function AILandToolCard({ tool }: { tool: Tool }) {
             {tool.category}
           </span>
         </div>
-        {/* arrow — appears on hover */}
-        <div
-          className="flex h-[32px] w-[32px] items-center justify-center rounded-full"
-          style={{
-            color: C.textDim,
-            opacity: hover ? 1 : 0,
-            background: hover ? 'rgba(255,255,255,0.06)' : 'transparent',
-            transform: hover ? 'translate(2px,-2px)' : 'translate(0,0)',
-            transition:
-              'opacity 200ms cubic-bezier(0.4,0,0.2,1), background-color 200ms cubic-bezier(0.4,0,0.2,1), transform 240ms cubic-bezier(0.4,0,0.2,1)',
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path
-              d="M3 11L11 3M5 3h6v6"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
+        {/* arrow placeholder — keeps category row balanced; real arrow is above */}
+        <span aria-hidden style={{ width: 32, height: 32 }} />
       </div>
 
       {/* screenshot — 16:10 aspect, INSET from card edges so it isn't flush left/right.
@@ -412,10 +428,13 @@ function AILandToolCard({ tool }: { tool: Tool }) {
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover object-top"
+            placeholder="blur"
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAAGElEQVR4nGNkYGBgZGD4z8DAwMDAwMAAAA0ABS0ucYTfAAAAAElFTkSuQmCC"
             onLoad={() => setImgLoaded(true)}
             style={{
-              opacity: imgLoaded ? 1 : 0,
-              transition: 'opacity 520ms cubic-bezier(0.4,0,0.2,1)',
+              filter: imgLoaded ? 'blur(0)' : 'blur(16px)',
+              transform: imgLoaded ? 'scale(1)' : 'scale(1.04)',
+              transition: 'filter 600ms cubic-bezier(0.4,0,0.2,1), transform 600ms cubic-bezier(0.4,0,0.2,1)',
             }}
           />
         ) : (
@@ -455,14 +474,14 @@ function AILandToolCard({ tool }: { tool: Tool }) {
             marginBottom: 24,
           }}
         >
-          {tool.description}
+          {cleanDescription(tool.description)}
         </p>
       )}
 
-      {/* tag chips — smaller per Figma 702:2457 */}
-      {tool.tags && tool.tags.length > 0 && (
+      {/* use_cases chips — same data shown on detail page + Telegram caption */}
+      {tool.use_cases && tool.use_cases.length > 0 && (
         <div className="flex flex-wrap" style={{ gap: 6 }}>
-          {tool.tags.slice(0, 3).map((t) => (
+          {tool.use_cases.slice(0, 3).map((t) => (
             <span
               key={t}
               className="inline-flex items-center"
@@ -486,7 +505,8 @@ function AILandToolCard({ tool }: { tool: Tool }) {
           ))}
         </div>
       )}
-    </Link>
+      </Link>
+    </div>
   )
 }
 

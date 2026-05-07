@@ -18,14 +18,28 @@ export default function Footer() {
         fontFamily: fontSans,
       }}
     >
-      <div className="mx-auto flex max-w-[1440px] flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex max-w-[1440px] items-center justify-center">
         <nav className="flex flex-wrap items-center gap-x-2 gap-y-1" style={{ color: '#a0a0a8', fontSize: 14 }}>
-          <Link href="/about" className="hover:text-white transition-colors">About</Link>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-about'))}
+            className="hover:text-white transition-colors"
+            style={{ color: 'inherit', font: 'inherit', cursor: 'pointer' }}
+          >
+            About
+          </button>
           <span style={{ color: '#6a6a72' }}>•</span>
-          <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-privacy'))}
+            className="hover:text-white transition-colors"
+            style={{ color: 'inherit', font: 'inherit', cursor: 'pointer' }}
+          >
+            Privacy Policy
+          </button>
           <span style={{ color: '#6a6a72' }}>•</span>
           <a
-            href="https://www.linkedin.com/company/otherland-studio"
+            href="https://www.linkedin.com/company/other-land/?viewAsMember=true"
             target="_blank"
             rel="noopener"
             className="hover:text-white transition-colors"
@@ -40,35 +54,6 @@ export default function Footer() {
             </svg>
           </Link>
         </nav>
-        <span
-          style={{
-            fontFamily: fontSans,
-            color: '#6a6a72',
-            fontSize: 14,
-            letterSpacing: 0,
-          }}
-        >
-          Crafted by{' '}
-          <a
-            href="https://otherland.studio"
-            target="_blank"
-            rel="noopener"
-            style={{ color: '#ffffff', fontWeight: 500 }}
-            className="hover:underline"
-          >
-            Other Land
-          </a>{' '}
-          studio <span style={{ color: '#6a6a72' }}>/ dev</span>{' '}
-          <a
-            href="https://webf.love"
-            target="_blank"
-            rel="noopener"
-            style={{ color: '#ffffff', fontWeight: 500 }}
-            className="hover:underline"
-          >
-            webf.love
-          </a>
-        </span>
       </div>
     </footer>
   )

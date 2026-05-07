@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Exo_2, Inter, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import Footer from '@/components/layout/Footer'
+import AboutModal from '@/components/layout/AboutModal'
+import PrivacyModal from '@/components/layout/PrivacyModal'
 
 const exo2 = Exo_2({
   subsets: ['latin'],
@@ -40,6 +42,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full bg-page text-t1 antialiased flex flex-col">
         <div className="flex-1">{children}</div>
         <Footer />
+        <AboutModal />
+        <PrivacyModal />
       </body>
     </html>
   )

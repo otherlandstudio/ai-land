@@ -21,6 +21,19 @@ export function getCategoryColor(category: string): string {
   return categoryColors[category] ?? '#b1b1d3'
 }
 
+/**
+ * Strip footnote artifacts that AI enrichment sometimes leaves at the end
+ * of generated descriptions: "[1]", "[12]", trailing " 1", etc.
+ * Safe — only touches non-letter trailing tokens.
+ */
+export function cleanDescription(text: string | null | undefined): string {
+  if (!text) return ''
+  return text
+    .replace(/\s*\[\d+\]\s*$/g, '')   // trailing "[1]" / "[42]"
+    .replace(/\s+\d+\s*$/g, '')        // trailing " 1" / " 12"
+    .trim()
+}
+
 export function slugify(text: string): string {
   return text
     .toLowerCase()

@@ -53,8 +53,9 @@ export default function Pagination({ current, total }: Props) {
   return (
     <div
       ref={wrapperRef}
-      className="flex w-full flex-wrap items-center justify-center"
+      className="flex flex-wrap items-stretch justify-between"
       style={{
+        width: '100%',
         gap: 8,
         paddingTop: 56,
         paddingBottom: 120,
@@ -101,7 +102,6 @@ function Cell({
       style={{
         ...fontSans,
         flex: '1 1 0',
-        maxWidth: 144,
         minWidth: 56,
         aspectRatio: '1 / 1',
         borderRadius: 16,

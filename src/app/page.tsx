@@ -10,7 +10,7 @@ import ToolCardSkeleton from '@/components/tools/ToolCardSkeleton'
 
 export const revalidate = 3600
 
-const PAGE_SIZE = 9
+const PAGE_SIZE = 27
 
 interface PageProps {
   searchParams: Promise<{ category?: string; q?: string; page?: string }>

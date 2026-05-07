@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
 import type { Tool } from '@/lib/types'
-import { getCategoryColor } from '@/lib/utils'
+import { getCategoryColor, cleanDescription } from '@/lib/utils'
 import HelpMeModal from '@/components/tools/HelpMeModal'
 import FloatingSearch from '@/components/tools/FloatingSearch'
 
@@ -59,28 +59,29 @@ export default function ToolDetailClient({
 
       {/* Wide top row — wordmark left + Submit right (max 1440 page padding 64) */}
       <header
-        className="mx-auto flex items-start justify-between"
+        className="mx-auto flex items-start justify-between px-4 sm:px-6 lg:px-10"
         style={{
           maxWidth: 1440,
-          paddingLeft: 40,
-          paddingRight: 40,
           paddingTop: 20,
           paddingBottom: 56,
         }}
       >
         <Link
           href="/"
+          className="text-[22px] leading-[28px] md:text-[28px] md:leading-[32px]"
           style={{
             ...fontSans,
-            fontSize: 28,
-            lineHeight: '32px',
             fontWeight: 600,
             letterSpacing: 0,
             maxWidth: 650,
           }}
         >
           <span style={{ color: '#ffffff' }}>AI&nbsp;Land</span>
-          <span style={{ color: '#898989' }}> / Curated library of AI tools.</span>
+          <span style={{ color: '#898989' }}>
+            {' '}/ Curated library of AI tools.
+            <br />
+            Hand-picked and described in plain language.
+          </span>
         </Link>
         <div className="hidden md:block">
           <SubmitToolButton />
@@ -94,12 +95,15 @@ export default function ToolDetailClient({
         {/* HERO CARD — screenshot + info wrapped in a single card.
             « and » arrows live OUTSIDE the card, at page-edge positions.       */}
         <div className="relative">
+          {/* Arrows are anchored to the SCREENSHOT center (Y = article padding 36
+              + screenshot half-height 234 = 270px), not the article midpoint.
+              This keeps them stable when description/chips change height between tools. */}
           {prevSlug && (
             <Link
               href={`/tools/${prevSlug}`}
               aria-label="Previous tool"
-              className="absolute top-1/2 z-10 hidden -translate-y-1/2 lg:flex"
-              style={{ left: 'calc(492px - 50vw)' }}
+              className="absolute z-10 hidden -translate-y-1/2 lg:flex"
+              style={{ top: 270, left: 'calc(492px - 50vw)' }}
             >
               <CarouselArrow direction="prev" />
             </Link>
@@ -108,8 +112,8 @@ export default function ToolDetailClient({
             <Link
               href={`/tools/${nextSlug}`}
               aria-label="Next tool"
-              className="absolute top-1/2 z-10 hidden -translate-y-1/2 lg:flex"
-              style={{ right: 'calc(492px - 50vw)' }}
+              className="absolute z-10 hidden -translate-y-1/2 lg:flex"
+              style={{ top: 270, right: 'calc(492px - 50vw)' }}
             >
               <CarouselArrow direction="next" />
             </Link>
@@ -140,6 +144,8 @@ export default function ToolDetailClient({
                   fill
                   sizes="(max-width: 1024px) 100vw, 1280px"
                   className="object-cover object-top"
+                  placeholder="blur"
+                  blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAAGElEQVR4nGNkYGBgZGD4z8DAwMDAwMAAAA0ABS0ucYTfAAAAAElFTkSuQmCC"
                   priority
                 />
               ) : (
@@ -155,8 +161,12 @@ export default function ToolDetailClient({
             {/* Title row: [category + name] (left) ... [Visit website] (right) — Figma 1948757247 */}
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between md:gap-16">
               <div className="min-w-0">
-                {/* category */}
-                <div className="inline-flex items-center" style={{ gap: 10, marginBottom: 12 }}>
+                {/* category — clickable, leads to home filtered by this category */}
+                <Link
+                  href={`/?category=${encodeURIComponent(tool.category)}`}
+                  className="inline-flex items-center transition-opacity hover:opacity-80"
+                  style={{ gap: 10, marginBottom: 12, color: 'inherit', textDecoration: 'none' }}
+                >
                   <span
                     style={{
                       width: 8,
@@ -177,7 +187,7 @@ export default function ToolDetailClient({
                   >
                     {tool.category}
                   </span>
-                </div>
+                </Link>
 
                 {/* title */}
                 <h1
@@ -214,7 +224,7 @@ export default function ToolDetailClient({
                   maxWidth: 760,
                 }}
               >
-                {tool.description}
+                {cleanDescription(tool.description)}
               </p>
             )}
 
@@ -256,37 +266,40 @@ export default function ToolDetailClient({
           className="mx-auto px-4 sm:px-6 lg:px-10"
           style={{ maxWidth: 1440, paddingBottom: 120 }}
         >
-          <h2
-            className="inline-flex items-center"
-            style={{
-              ...fontSans,
-              color: C.text,
-              fontSize: 32,
-              lineHeight: '40px',
-              letterSpacing: '-0.01em',
-              fontWeight: 600,
-              gap: 12,
-              marginBottom: 24,
-            }}
-          >
-            <span style={{ color: C.textDim, fontWeight: 500 }}>More in</span>
-            {tool.category}
-            <span
-              className="inline-flex items-center justify-center rounded-full"
+          <h2 style={{ marginBottom: 24 }}>
+            <Link
+              href={`/?category=${encodeURIComponent(tool.category)}`}
+              className="inline-flex items-center transition-opacity hover:opacity-80"
               style={{
-                background: color,
-                color: '#0a0a0c',
-                fontSize: 12,
+                ...fontSans,
+                color: C.text,
+                fontSize: 32,
+                lineHeight: '40px',
+                letterSpacing: '-0.01em',
                 fontWeight: 600,
-                minWidth: 26,
-                height: 24,
-                paddingLeft: 8,
-                paddingRight: 8,
-                ...fontMono,
+                gap: 12,
+                textDecoration: 'none',
               }}
             >
-              {categoryCount}
-            </span>
+              <span style={{ color: C.textDim, fontWeight: 500 }}>More in</span>
+              {tool.category}
+              <span
+                className="inline-flex items-center justify-center rounded-full"
+                style={{
+                  background: color,
+                  color: '#0a0a0c',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  minWidth: 26,
+                  height: 24,
+                  paddingLeft: 8,
+                  paddingRight: 8,
+                  ...fontMono,
+                }}
+              >
+                {categoryCount}
+              </span>
+            </Link>
           </h2>
 
           <div
@@ -361,7 +374,7 @@ function SubmitToolButton() {
         lineHeight: '20px',
         letterSpacing: '0.11em',
         textTransform: 'uppercase',
-        fontWeight: 600,
+        fontWeight: 400,
         transition: 'background-color 220ms cubic-bezier(0.4,0,0.2,1)',
       }}
     >
@@ -377,7 +390,6 @@ function VisitWebsiteButton({ href }: { href: string }) {
   return (
     <a
       href={href}
-      target="_blank"
       rel="noopener noreferrer"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -452,19 +464,49 @@ function RelatedCard({ tool }: { tool: Tool }) {
   const [hover, setHover] = useState(false)
   const color = getCategoryColor(tool.category)
   return (
-    <Link
-      href={`/tools/${tool.slug}`}
+    <div
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className="block"
+      className="relative"
       style={{
         background: hover ? C.cardBgHover : C.cardBg,
         borderRadius: 24,
-        padding: 32,
         transition: 'background-color 280ms cubic-bezier(0.4,0,0.2,1), transform 280ms cubic-bezier(0.4,0,0.2,1)',
         transform: hover ? 'translateY(-3px)' : 'translateY(0)',
       }}
     >
+      {tool.website_url && (
+        <a
+          href={tool.website_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Open ${tool.name} website`}
+          onClick={(e) => e.stopPropagation()}
+          className="absolute z-10 flex h-[32px] w-[32px] items-center justify-center rounded-full"
+          style={{
+            top: 30,
+            right: 30,
+            color: C.textDim,
+            opacity: hover ? 1 : 0,
+            background: hover ? 'rgba(255,255,255,0.06)' : 'transparent',
+            transform: hover ? 'translate(2px,-2px)' : 'translate(0,0)',
+            transition:
+              'opacity 200ms cubic-bezier(0.4,0,0.2,1), background-color 200ms cubic-bezier(0.4,0,0.2,1), transform 240ms cubic-bezier(0.4,0,0.2,1)',
+            cursor: 'pointer',
+            pointerEvents: hover ? 'auto' : 'none',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 11L11 3M5 3h6v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </a>
+      )}
+
+      <Link
+        href={`/tools/${tool.slug}`}
+        className="block"
+        style={{ padding: 32, color: 'inherit', textDecoration: 'none' }}
+      >
       <div className="flex items-center justify-between" style={{ marginBottom: 28 }}>
         <div className="inline-flex items-center" style={{ gap: 10 }}>
           <span style={{ width: 8, height: 8, borderRadius: 999, background: color }} />
@@ -480,21 +522,7 @@ function RelatedCard({ tool }: { tool: Tool }) {
             {tool.category}
           </span>
         </div>
-        <div
-          className="flex h-[32px] w-[32px] items-center justify-center rounded-full"
-          style={{
-            color: C.textDim,
-            opacity: hover ? 1 : 0,
-            background: hover ? 'rgba(255,255,255,0.06)' : 'transparent',
-            transform: hover ? 'translate(2px,-2px)' : 'translate(0,0)',
-            transition:
-              'opacity 200ms cubic-bezier(0.4,0,0.2,1), background-color 200ms cubic-bezier(0.4,0,0.2,1), transform 240ms cubic-bezier(0.4,0,0.2,1)',
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M3 11L11 3M5 3h6v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
+        <span aria-hidden style={{ width: 32, height: 32 }} />
       </div>
 
       <div
@@ -515,6 +543,8 @@ function RelatedCard({ tool }: { tool: Tool }) {
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover object-top"
+            placeholder="blur"
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAAGElEQVR4nGNkYGBgZGD4z8DAwMDAwMAAAA0ABS0ucYTfAAAAAElFTkSuQmCC"
           />
         ) : (
           <div
@@ -547,12 +577,36 @@ function RelatedCard({ tool }: { tool: Tool }) {
             color: C.textDim,
             fontSize: 16,
             lineHeight: '24px',
+            marginBottom: 20,
           }}
         >
-          {tool.description}
+          {cleanDescription(tool.description)}
         </p>
       )}
-    </Link>
+      {tool.use_cases && tool.use_cases.length > 0 && (
+        <div className="flex flex-wrap" style={{ gap: 6 }}>
+          {tool.use_cases.slice(0, 3).map((uc) => (
+            <span
+              key={uc}
+              className="inline-flex items-center"
+              style={{
+                ...fontMono,
+                fontSize: 11,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: '#9b9b9b',
+                background: '#141414',
+                borderRadius: 6,
+                padding: '6px 12px',
+              }}
+            >
+              {uc}
+            </span>
+          ))}
+        </div>
+      )}
+      </Link>
+    </div>
   )
 }
 

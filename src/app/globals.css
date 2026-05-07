@@ -48,14 +48,31 @@ body {
   min-height: 100dvh;
 }
 
-/* Scrollbar */
-* { scrollbar-width: thin; scrollbar-color: var(--color-s3) transparent; }
+/* Scrollbar — neutral, not blue */
+* { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.18) transparent; }
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-s3); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.28); }
 
 /* Selection */
 ::selection { background: rgba(255,255,255,0.18); color: #ffffff; }
+::-moz-selection { background: rgba(255,255,255,0.18); color: #ffffff; }
+
+/* iOS tap highlight — kill the default blue flash */
+html { -webkit-tap-highlight-color: transparent; }
+
+/* Cursor pointer — global rule for all clickable elements */
+button:not(:disabled),
+a[href],
+[role="button"],
+[role="link"],
+[role="tab"],
+summary,
+label[for],
+select {
+  cursor: pointer;
+}
 
 /* Focus ring — only on links/buttons, not inputs (inputs handle their own focus via border) */
 a:focus-visible,

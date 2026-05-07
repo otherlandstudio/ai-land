@@ -1,32 +1,41 @@
 export default function ToolCardSkeleton() {
   return (
-    <div className="bg-[#181b38] border border-white/6 rounded-2xl overflow-hidden">
-      {/* Tier bar */}
-      <div className="h-[3px] bg-[#25295d] animate-pulse" />
+    <div
+      className="overflow-hidden"
+      style={{
+        background: '#222222',
+        borderRadius: 24,
+        padding: '20px 24px 24px 24px',
+      }}
+    >
+      <div className="flex items-center justify-between" style={{ marginBottom: 28 }}>
+        <div className="h-[14px] w-[120px] rounded-full bg-[#2c2c2c] animate-pulse" />
+        <div className="h-[32px] w-[32px] rounded-full bg-[#2c2c2c] animate-pulse" />
+      </div>
 
-      {/* Screenshot placeholder */}
-      <div className="aspect-[16/9] bg-[#1c2146] animate-pulse" />
+      <div
+        className="animate-pulse"
+        style={{
+          aspectRatio: '16 / 10',
+          borderRadius: 12,
+          background: '#1a1a1a',
+          marginBottom: 36,
+          marginLeft: 16,
+          marginRight: 16,
+        }}
+      />
 
-      {/* Body */}
-      <div className="p-4 flex flex-col gap-2.5">
-        {/* Category */}
-        <div className="h-2.5 w-16 rounded-full bg-[#25295d] animate-pulse" />
+      <div className="h-[26px] w-2/3 rounded-md bg-[#2c2c2c] animate-pulse" style={{ marginBottom: 12 }} />
 
-        {/* Name */}
-        <div className="h-4 w-3/4 rounded-full bg-[#25295d] animate-pulse" />
+      <div className="flex flex-col gap-2" style={{ marginBottom: 24 }}>
+        <div className="h-[14px] w-full rounded-full bg-[#1a1a1a] animate-pulse" />
+        <div className="h-[14px] w-5/6 rounded-full bg-[#1a1a1a] animate-pulse" />
+      </div>
 
-        {/* Description lines */}
-        <div className="flex flex-col gap-1.5">
-          <div className="h-3 w-full rounded-full bg-[#1c2146] animate-pulse" />
-          <div className="h-3 w-5/6 rounded-full bg-[#1c2146] animate-pulse" />
-        </div>
-
-        {/* Tags */}
-        <div className="flex gap-1 mt-0.5">
-          <div className="h-5 w-12 rounded-full bg-[#1c2146] animate-pulse" />
-          <div className="h-5 w-16 rounded-full bg-[#1c2146] animate-pulse" />
-          <div className="h-5 w-10 rounded-full bg-[#1c2146] animate-pulse" />
-        </div>
+      <div className="flex gap-1.5">
+        <div className="h-[26px] w-[120px] rounded-md bg-[#141414] animate-pulse" />
+        <div className="h-[26px] w-[100px] rounded-md bg-[#141414] animate-pulse" />
+        <div className="h-[26px] w-[140px] rounded-md bg-[#141414] animate-pulse" />
       </div>
     </div>
   )

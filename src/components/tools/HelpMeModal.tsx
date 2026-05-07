@@ -12,8 +12,8 @@ interface HelpMeModalProps {
 }
 
 const C = {
-  surface: '#15151a',
-  surfaceHover: '#1c1c22',
+  surface: '#141414',
+  surfaceHover: '#1f1f1f',
   border: 'rgba(255,255,255,0.08)',
   borderStrong: 'rgba(255,255,255,0.18)',
   text: '#ffffff',
@@ -82,7 +82,7 @@ export default function HelpMeModal({ tool, open, onClose }: HelpMeModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center px-4"
+      className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto px-4 py-4 sm:items-center sm:py-8"
       style={{
         background: 'rgba(0,0,0,0.65)',
         backdropFilter: 'blur(12px)',
@@ -94,12 +94,13 @@ export default function HelpMeModal({ tool, open, onClose }: HelpMeModalProps) {
       }}
     >
       <div
-        className="w-full max-w-[520px] overflow-hidden"
+        className="w-full max-w-[520px] overflow-y-auto overflow-x-hidden"
         style={{
           background: C.surface,
           border: `1px solid ${C.border}`,
           borderRadius: 24,
           boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+          maxHeight: 'calc(100vh - 32px)',
         }}
       >
         {/* Header */}
