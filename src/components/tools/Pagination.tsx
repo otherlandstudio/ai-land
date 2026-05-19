@@ -53,7 +53,7 @@ export default function Pagination({ current, total }: Props) {
   return (
     <div
       ref={wrapperRef}
-      className="flex flex-wrap items-stretch justify-start"
+      className="flex flex-wrap items-stretch justify-center"
       style={{
         width: '100%',
         gap: 8,
