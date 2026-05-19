@@ -53,7 +53,7 @@ export default function Pagination({ current, total }: Props) {
   return (
     <div
       ref={wrapperRef}
-      className="flex flex-wrap items-stretch justify-between"
+      className="flex flex-wrap items-stretch justify-start"
       style={{
         width: '100%',
         gap: 8,
@@ -103,6 +103,7 @@ function Cell({
         ...fontSans,
         flex: '1 1 0',
         minWidth: 56,
+        maxWidth: 144,
         aspectRatio: '1 / 1',
         borderRadius: 16,
         background: active ? '#222222' : hover && interactive ? '#1c1c1c' : 'transparent',
