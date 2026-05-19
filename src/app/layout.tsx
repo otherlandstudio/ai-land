@@ -27,12 +27,33 @@ const mono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'AI Land — Discover AI tools that actually work',
-  description: 'A curated directory of the best AI tools. Discover, compare and find the right AI tool for your workflow.',
+  metadataBase: new URL('https://ailand.gallery'),
+  title: 'AI Land — Curated library of AI tools',
+  description: 'A hand-picked collection of AI tools that actually work. Discover, compare and find the right tool for your workflow — described in plain language.',
   openGraph: {
-    title: 'AI Land — Discover AI tools that actually work',
-    description: 'A curated directory of the best AI tools.',
+    title: 'AI Land — Curated library of AI tools',
+    description: 'Hand-picked AI tools that actually work, described in plain language.',
+    url: 'https://ailand.gallery',
+    siteName: 'AI Land',
     type: 'website',
+    locale: 'en_US',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'AI Land — Curated library of AI tools',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI Land — Curated library of AI tools',
+    description: 'Hand-picked AI tools that actually work, described in plain language.',
+    images: ['/og-image.png'],
+  },
+  alternates: {
+    canonical: 'https://ailand.gallery',
   },
 }
 
