@@ -24,6 +24,15 @@ export default function Pagination({ current, total }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   // y of the pagination wrapper at the moment of click — null when no adjust pending
   const lockYRef = useRef<number | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
 
   // After the transition commits, restore the pagination to the same viewport y.
   useEffect(() => {
@@ -48,22 +57,22 @@ export default function Pagination({ current, total }: Props) {
     startTransition(() => router.push(`${pathname}?${params.toString()}`, { scroll: false }))
   }
 
-  const items = pageItems(current, total)
+  const items = pageItems(current, total, isMobile)
 
   return (
     <div
       ref={wrapperRef}
-      className="flex flex-wrap items-stretch justify-center"
+      className="flex items-stretch justify-center"
       style={{
         width: '100%',
         gap: 8,
-        paddingTop: 56,
-        paddingBottom: 120,
+        paddingTop: isMobile ? 32 : 56,
+        paddingBottom: isMobile ? 80 : 120,
         ...fontSans,
       }}
     >
       {items.map((item, i) => {
-        if (item === 'ellipsis') return <Cell key={`e-${i}`} label="..." muted />
+        if (item === 'ellipsis') return <Cell key={`e-${i}`} label="..." muted compact={isMobile} />
         const n = item as number
         return (
           <Cell
@@ -71,6 +80,7 @@ export default function Pagination({ current, total }: Props) {
             label={String(n)}
             active={n === current}
             onClick={() => goto(n)}
+            compact={isMobile}
           />
         )
       })}
@@ -82,11 +92,13 @@ function Cell({
   label,
   active = false,
   muted = false,
+  compact = false,
   onClick,
 }: {
   label: string
   active?: boolean
   muted?: boolean
+  compact?: boolean
   onClick?: () => void
 }) {
   const [hover, setHover] = useState(false)
@@ -101,15 +113,17 @@ function Cell({
       className="flex items-center justify-center"
       style={{
         ...fontSans,
-        flex: '1 1 0',
-        minWidth: 56,
-        maxWidth: 144,
-        aspectRatio: '1 / 1',
-        borderRadius: 16,
+        flex: compact ? '0 0 auto' : '1 1 0',
+        width: compact ? 44 : undefined,
+        height: compact ? 44 : undefined,
+        minWidth: compact ? 44 : 56,
+        maxWidth: compact ? 44 : 144,
+        aspectRatio: compact ? undefined : '1 / 1',
+        borderRadius: compact ? 12 : 16,
         background: active ? '#222222' : hover && interactive ? '#1c1c1c' : 'transparent',
         border: `1px solid #222222`,
         color: muted ? '#9b9b9b' : '#ffffff',
-        fontSize: 18,
+        fontSize: compact ? 14 : 18,
         fontWeight: 600,
         lineHeight: '32px',
         cursor: interactive ? 'pointer' : 'default',
@@ -121,13 +135,16 @@ function Cell({
   )
 }
 
-/* Build a 9-cell page list:
-   total ≤ 9              → all pages
-   current near start (≤4) → 1..6, ellipsis, total
-   current near end (≥last-3) → 1, ellipsis, last-5..last
-   middle                 → 1, ellipsis, c-2..c+2, ellipsis, total */
+/* Build the page list. Desktop uses up to 9 cells; mobile compresses to ≤5 cells with
+   ellipses so the row never wraps and cells stay readable. */
 type Item = number | 'ellipsis'
-function pageItems(current: number, total: number): Item[] {
+function pageItems(current: number, total: number, isMobile = false): Item[] {
+  if (isMobile) {
+    if (total <= 4) return Array.from({ length: total }, (_, i) => i + 1)
+    if (current <= 2) return [1, 2, 3, 'ellipsis', total]
+    if (current >= total - 1) return [1, 'ellipsis', total - 2, total - 1, total]
+    return [1, 'ellipsis', current, 'ellipsis', total]
+  }
   if (total <= 9) return Array.from({ length: total }, (_, i) => i + 1)
   if (current <= 4) {
     return [1, 2, 3, 4, 5, 6, 'ellipsis', total]

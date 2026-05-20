@@ -38,9 +38,25 @@ export default function FloatingSearch({ suggestions = [] }: Props) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Tool[]>([])
   const [loading, setLoading] = useState(false)
+  const [hiddenByFooter, setHiddenByFooter] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Hide pill when footer enters viewport so it stops overlapping the links
+  useEffect(() => {
+    const footer = document.querySelector('footer')
+    if (!footer) return
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setHiddenByFooter(entry.isIntersecting)
+        if (entry.isIntersecting) setOpen(false)
+      },
+      { rootMargin: '0px 0px -24px 0px', threshold: 0 }
+    )
+    io.observe(footer)
+    return () => io.disconnect()
+  }, [])
 
   // Cmd+K toggles
   useEffect(() => {
@@ -126,10 +142,15 @@ export default function FloatingSearch({ suggestions = [] }: Props) {
     <div
       ref={wrapperRef}
       className="fixed inset-x-0 z-[60] mx-auto flex flex-col items-center"
+      aria-hidden={hiddenByFooter}
       style={{
         bottom: 24,
         width: 'fit-content',
         maxWidth: 'min(640px, calc(100vw - 32px))',
+        opacity: hiddenByFooter ? 0 : 1,
+        transform: hiddenByFooter ? 'translateY(16px)' : 'translateY(0)',
+        pointerEvents: hiddenByFooter ? 'none' : 'auto',
+        transition: 'opacity 220ms cubic-bezier(0.4,0,0.2,1), transform 220ms cubic-bezier(0.4,0,0.2,1)',
         ...fontSans,
       }}
     >

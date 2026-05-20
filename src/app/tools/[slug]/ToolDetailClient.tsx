@@ -68,19 +68,20 @@ export default function ToolDetailClient({
       >
         <Link
           href="/"
-          className="text-[22px] leading-[28px] md:text-[28px] md:leading-[32px]"
+          className="text-[19px] leading-[25px] md:text-[28px] md:leading-[32px]"
           style={{
             ...fontSans,
             fontWeight: 600,
             letterSpacing: 0,
             maxWidth: 650,
+            textWrap: 'balance',
           }}
         >
           <span style={{ color: '#ffffff' }}>AI&nbsp;Land</span>
           <span style={{ color: '#898989' }}>
-            {' '}/ Curated library of AI tools.
+            {' '}/ Curated library of AI&nbsp;tools.
             <br />
-            Hand-picked and described in plain language.
+            Hand-picked and described in plain&nbsp;language.
           </span>
         </Link>
         <div className="hidden md:block">

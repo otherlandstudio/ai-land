@@ -155,19 +155,20 @@ function Hero({ totalCount: _totalCount }: { totalCount: number; hideTopWordmark
   return (
     <section className="pt-5 pb-20 md:pb-[168px]">
       <h1
-        className="text-[22px] leading-[28px] md:text-[28px] md:leading-[32px]"
+        className="text-[19px] leading-[25px] md:text-[28px] md:leading-[32px]"
         style={{
           ...fontSans,
           letterSpacing: 0,
           fontWeight: 600,
           maxWidth: 650,
+          textWrap: 'balance',
         }}
       >
         <Link href="/" style={{ color: '#ffffff' }}>AI&nbsp;Land</Link>
         <span style={{ color: '#898989' }}>
-          {' '}/ Curated library of AI tools.
+          {' '}/ Curated library of AI&nbsp;tools.
           <br />
-          Hand-picked and described in plain language.
+          Hand-picked and described in plain&nbsp;language.
         </span>
       </h1>
     </section>
