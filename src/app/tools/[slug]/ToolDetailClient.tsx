@@ -304,7 +304,7 @@ export default function ToolDetailClient({
 
           <div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-            style={{ gap: 22 }}
+            style={{ gap: 8, marginTop: 32 }}
           >
             {related.map((t) => (
               <RelatedCard key={t.id} tool={t} />
@@ -462,17 +462,17 @@ function AskAIBanner({ onClick }: { onClick: () => void }) {
 
 function RelatedCard({ tool }: { tool: Tool }) {
   const [hover, setHover] = useState(false)
+  const [imgLoaded, setImgLoaded] = useState(false)
   const color = getCategoryColor(tool.category)
   return (
     <div
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      className="relative"
+      className="group relative"
       style={{
         background: hover ? C.cardBgHover : C.cardBg,
         borderRadius: 24,
-        transition: 'background-color 280ms cubic-bezier(0.4,0,0.2,1), transform 280ms cubic-bezier(0.4,0,0.2,1)',
-        transform: hover ? 'translateY(-3px)' : 'translateY(0)',
+        transition: 'background-color 280ms cubic-bezier(0.4,0,0.2,1)',
       }}
     >
       {tool.website_url && (
@@ -484,8 +484,8 @@ function RelatedCard({ tool }: { tool: Tool }) {
           onClick={(e) => e.stopPropagation()}
           className="absolute z-10 flex h-[32px] w-[32px] items-center justify-center rounded-full"
           style={{
-            top: 30,
-            right: 30,
+            top: 18,
+            right: 22,
             color: C.textDim,
             opacity: hover ? 1 : 0,
             background: hover ? 'rgba(255,255,255,0.06)' : 'transparent',
@@ -505,11 +505,19 @@ function RelatedCard({ tool }: { tool: Tool }) {
       <Link
         href={`/tools/${tool.slug}`}
         className="block"
-        style={{ padding: 32, color: 'inherit', textDecoration: 'none' }}
+        style={{ padding: '20px 24px 24px 24px', color: 'inherit', textDecoration: 'none' }}
       >
       <div className="flex items-center justify-between" style={{ marginBottom: 28 }}>
         <div className="inline-flex items-center" style={{ gap: 10 }}>
-          <span style={{ width: 8, height: 8, borderRadius: 999, background: color }} />
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 999,
+              background: color,
+              display: 'inline-block',
+            }}
+          />
           <span
             style={{
               ...fontMono,
@@ -534,6 +542,10 @@ function RelatedCard({ tool }: { tool: Tool }) {
           marginBottom: 36,
           marginLeft: 16,
           marginRight: 16,
+          boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+          transform: hover ? 'scale(1.10)' : 'scale(1)',
+          transformOrigin: 'center',
+          transition: 'transform 320ms cubic-bezier(0.4,0,0.2,1)',
         }}
       >
         {tool.screenshot_url ? (
@@ -541,10 +553,16 @@ function RelatedCard({ tool }: { tool: Tool }) {
             src={tool.screenshot_url}
             alt={tool.name}
             fill
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover object-top"
             placeholder="blur"
             blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAAGElEQVR4nGNkYGBgZGD4z8DAwMDAwMAAAA0ABS0ucYTfAAAAAElFTkSuQmCC"
+            onLoad={() => setImgLoaded(true)}
+            style={{
+              filter: imgLoaded ? 'blur(0)' : 'blur(16px)',
+              transform: imgLoaded ? 'scale(1)' : 'scale(1.04)',
+              transition: 'filter 600ms cubic-bezier(0.4,0,0.2,1), transform 600ms cubic-bezier(0.4,0,0.2,1)',
+            }}
           />
         ) : (
           <div
@@ -560,11 +578,11 @@ function RelatedCard({ tool }: { tool: Tool }) {
         style={{
           ...fontSans,
           color: C.text,
-          fontSize: 26,
-          lineHeight: '32px',
+          fontSize: 22,
+          lineHeight: '28px',
           letterSpacing: '-0.01em',
           fontWeight: 600,
-          marginBottom: 16,
+          marginBottom: 12,
         }}
       >
         {tool.name}
@@ -575,9 +593,9 @@ function RelatedCard({ tool }: { tool: Tool }) {
           style={{
             ...fontSans,
             color: C.textDim,
-            fontSize: 16,
-            lineHeight: '24px',
-            marginBottom: 20,
+            fontSize: 14,
+            lineHeight: '22px',
+            marginBottom: 24,
           }}
         >
           {cleanDescription(tool.description)}
@@ -591,13 +609,17 @@ function RelatedCard({ tool }: { tool: Tool }) {
               className="inline-flex items-center"
               style={{
                 ...fontMono,
-                fontSize: 11,
-                letterSpacing: '0.08em',
+                fontSize: 10,
+                letterSpacing: '0.06em',
                 textTransform: 'uppercase',
                 color: '#9b9b9b',
-                background: '#141414',
+                border: 'none',
                 borderRadius: 6,
-                padding: '6px 12px',
+                paddingLeft: 10,
+                paddingRight: 10,
+                paddingTop: 6,
+                paddingBottom: 6,
+                background: '#141414',
               }}
             >
               {uc}

@@ -30,18 +30,85 @@ app.post('/screenshot', async (req, res) => {
 
   let browser
   try {
-    browser = await chromium.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] })
-    const page = await browser.newPage()
-
-    await page.setViewportSize({ width: 1280, height: 800 })
+    browser = await chromium.launch({
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-features=FedCm,FedCmAuthz',
+        '--disable-blink-features=AutomationControlled',
+      ],
+    })
+    // Stealth context — mimics a real browser to bypass bot detection
+    // (Alibaba ESA, Cloudflare-lite, basic UA-sniffers).
+    const ctx = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      viewport: { width: 1280, height: 800 },
+      locale: 'en-US',
+      timezoneId: 'America/New_York',
+    })
+    await ctx.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined })
+      Object.defineProperty(navigator, 'languages', { get: () => ['en-US', 'en'] })
+      Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] })
+    })
+    const page = await ctx.newPage()
 
     // Block unnecessary resources to speed things up
     await page.route('**/*.{woff,woff2,ttf,otf}', route => route.abort())
 
+    // Block Google One Tap / Identity Services so the "Sign in with Google"
+    // overlay never loads on third-party sites we screenshot.
+    await page.route('**/accounts.google.com/gsi/**', route => route.abort())
+    await page.route('**/gstatic.com/_/gsi/**', route => route.abort())
+
     await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 })
 
-    // Wait for content to settle (animations, lazy loads)
-    await page.waitForTimeout(1500)
+    // Fallback: hide any One Tap iframe that slipped past the network block,
+    // plus the most common cookie-consent overlays that ruin marketing screenshots.
+    await page.addStyleTag({
+      content: `
+        iframe[src*="accounts.google.com/gsi"],
+        #credential_picker_container,
+        [id^="credential_picker_iframe"],
+        #onetrust-banner-sdk,
+        #onetrust-consent-sdk,
+        #osano-cm-window,
+        #cookie-banner,
+        [id*="cookie-banner"],
+        [class*="cookie-banner"],
+        [id*="CookieConsent"],
+        [class*="CookieConsent"],
+        [class*="cookie-consent"],
+        [aria-label*="cookie" i],
+        [aria-label*="consent" i],
+        .cky-consent-container,
+        .truste_box_overlay,
+        .truste_overlay,
+        #usercentrics-root { display: none !important; }
+        html, body { overflow: auto !important; }
+      `,
+    }).catch(() => {})
+
+    // Wait for content to settle (animations, lazy loads, splash screens,
+    // delayed cookie banners that appear ~2s after load)
+    await page.waitForTimeout(3000)
+
+    // Auto-dismiss cookie banners that use generic selectors by clicking
+    // common reject/decline buttons. Done AFTER the wait so delayed banners
+    // are already in the DOM. Failures are silent.
+    await page.evaluate(() => {
+      const labels = ['reject all', 'reject', 'decline all', 'decline', 'dismiss', 'no thanks', 'не приймати', 'відхилити']
+      const els = Array.from(document.querySelectorAll('button, a[role="button"], div[role="button"], [class*="cookie"] button, [class*="consent"] button'))
+      for (const el of els) {
+        const txt = ((el.innerText || el.textContent || '').trim().toLowerCase())
+        if (labels.includes(txt) && el.offsetParent) {
+          try { el.click() } catch {}
+        }
+      }
+    }).catch(() => {})
+
+    // Small settle after dismiss
+    await page.waitForTimeout(500)
 
     const buffer = await page.screenshot({ type: 'png', fullPage: false })
 
