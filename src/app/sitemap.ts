@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { getAllPublishedSlugs } from '@/lib/supabase'
+import { getAllPublishedSlugs } from '@/lib/tools'
 
 const BASE_URL = 'https://ai.land'
 

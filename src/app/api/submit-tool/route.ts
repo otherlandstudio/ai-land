@@ -1,17 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TELEGRAM_CHANNEL = process.env.TELEGRAM_CHANNEL_ID
-
-function getServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  )
-}
 
 function parseJSON(content: string) {
   const match = content.match(/```(?:json)?\n?([\s\S]+?)\n?```/)
@@ -53,10 +46,15 @@ Tool: ${tool.tool_name} | ${tool.website_url} | ${tool.description} | ${tool.cat
   }
 }
 
-async function notifyTelegram(pending: { id: string; tool_data: Record<string, unknown> }) {
+type PayloadClient = Awaited<ReturnType<typeof getPayload>>
+
+async function notifyTelegram(
+  payload: PayloadClient,
+  pending: { id: string | number; toolData: Record<string, unknown> },
+) {
   if (!TELEGRAM_TOKEN || !TELEGRAM_CHANNEL) return
 
-  const tool = pending.tool_data
+  const tool = pending.toolData
   const useCases = Array.isArray(tool.use_cases) && tool.use_cases.length
     ? `\n\n🎯 <b>Use cases:</b>\n${(tool.use_cases as string[]).map((u) => `• ${u}`).join('\n')}`
     : ''
@@ -84,10 +82,11 @@ async function notifyTelegram(pending: { id: string; tool_data: Record<string, u
     })
     const data = await res.json()
     if (data.result?.message_id) {
-      await getServiceClient()
-        .from('pending_tools')
-        .update({ telegram_msg_id: data.result.message_id })
-        .eq('id', pending.id)
+      await payload.update({
+        collection: 'pending-submissions',
+        id: pending.id,
+        data: { telegramMsgId: data.result.message_id },
+      })
     }
   } catch (err) {
     console.error('[submit-tool] Telegram notify failed:', err)
@@ -110,16 +109,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'invalid url' }, { status: 400 })
     }
 
-    const supabase = getServiceClient()
+    const payload = await getPayload({ config })
 
-    // Duplicate check
-    const { data: existing } = await supabase
-      .from('pending_tools')
-      .select('id')
-      .eq('tool_data->>website_url', website_url)
-      .maybeSingle()
-
-    if (existing) {
+    // Дублікат — уже опублікований тул із цим сайтом?
+    const dup = await payload.find({
+      collection: 'tools',
+      where: { websiteUrl: { equals: website_url } },
+      limit: 1,
+      depth: 0,
+    })
+    if (dup.totalDocs > 0) {
       return NextResponse.json({ error: 'already submitted' }, { status: 409 })
     }
 
@@ -138,25 +137,19 @@ export async function POST(req: NextRequest) {
         : null,
     }
 
-    // Save to pending_tools
-    const { data: pending, error } = await supabase
-      .from('pending_tools')
-      .insert({
-        tool_data: toolData,
+    const pending = await payload.create({
+      collection: 'pending-submissions',
+      data: {
+        title: tool_name,
         status: 'pending_review',
         source: 'user_submission',
-        submitted_by: body.your_email ?? null,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error('[submit-tool] Supabase error:', error.message)
-      return NextResponse.json({ error: 'server error' }, { status: 500 })
-    }
+        submittedBy: body.your_email ?? null,
+        toolData,
+      },
+    })
 
     // Notify Telegram (fire-and-forget)
-    notifyTelegram(pending).catch(console.error)
+    notifyTelegram(payload, pending as { id: string | number; toolData: Record<string, unknown> }).catch(console.error)
 
     return NextResponse.json({ ok: true })
   } catch (err) {

@@ -2,10 +2,21 @@
 // Usage: node research.js
 
 import 'dotenv/config'
-import { createClient } from '@supabase/supabase-js'
 import { enrichTool, stripCitations } from './utils/enrich.js'
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
+// Payload REST API (замість прямого Supabase). Потрібні env:
+// PAYLOAD_API_URL (напр. https://ailand.gallery / http://localhost:3000), PAYLOAD_API_KEY.
+const API = (process.env.PAYLOAD_API_URL || 'http://localhost:3000').replace(/\/$/, '')
+const AUTH = { Authorization: `users API-Key ${process.env.PAYLOAD_API_KEY}` }
+const JSON_HEADERS = { ...AUTH, 'Content-Type': 'application/json' }
+
+async function api(path, init = {}) {
+  const res = await fetch(`${API}/api${path}`, init)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.errors?.[0]?.message || `HTTP ${res.status}`)
+  return data
+}
+
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TELEGRAM_CHANNEL = process.env.TELEGRAM_CHANNEL_ID
@@ -65,16 +76,24 @@ Categories must be exactly one of: Assistants, Writing & Content, Creativity & D
 
 async function deduplicateTools(tools) {
   const urls = tools.map(t => t.website_url).filter(Boolean)
+  const existingUrls = new Set()
 
-  const [{ data: existing }, { data: pending }] = await Promise.all([
-    supabase.from('tools').select('website_url').in('website_url', urls),
-    supabase.from('pending_tools').select('tool_data').in('tool_data->>website_url', urls),
-  ])
-
-  const existingUrls = new Set([
-    ...(existing ?? []).map(r => r.website_url),
-    ...(pending ?? []).map(r => r.tool_data?.website_url),
-  ])
+  try {
+    // опубліковані тули з такими сайтами
+    if (urls.length) {
+      const q = encodeURIComponent(urls.join(','))
+      const pub = await api(`/tools?where[websiteUrl][in]=${q}&limit=1000&depth=0`, { headers: AUTH })
+      for (const d of pub.docs ?? []) if (d.websiteUrl) existingUrls.add(d.websiteUrl)
+    }
+    // заявки в черзі на розгляді (json-поле не фільтрується в REST — звіряємо в JS)
+    const pend = await api('/pending-submissions?where[status][equals]=pending_review&limit=1000&depth=0', { headers: AUTH })
+    for (const d of pend.docs ?? []) {
+      const u = d.toolData?.website_url
+      if (u) existingUrls.add(u)
+    }
+  } catch (err) {
+    console.warn('[research] dedupe lookup failed, proceeding without:', err.message)
+  }
 
   const newTools = tools.filter(t => !existingUrls.has(t.website_url))
   console.log(`[research] ${newTools.length} new (filtered ${tools.length - newTools.length} duplicates)`)
@@ -99,22 +118,22 @@ async function takeScreenshot(website_url, slug) {
 }
 
 async function saveToPending(toolData) {
-  const { data, error } = await supabase
-    .from('pending_tools')
-    .insert({
-      tool_data: toolData,
+  const data = await api('/pending-submissions', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({
+      title: toolData.name ?? toolData.slug ?? 'Без назви',
       status: 'pending_review',
       source: 'weekly_research',
-    })
-    .select()
-    .single()
-
-  if (error) throw new Error(`Supabase insert error: ${error.message}`)
-  return data
+      toolData,
+    }),
+  })
+  // Payload REST повертає { doc, message }
+  return data.doc ?? data
 }
 
 async function sendToTelegram(pending, screenshotUrl) {
-  const tool = pending.tool_data
+  const tool = pending.toolData ?? pending.tool_data ?? {}
   const useCases = Array.isArray(tool.use_cases) && tool.use_cases.length
     ? `\n\n🎯 <b>Use cases:</b>\n${tool.use_cases.map((u) => `• ${u}`).join('\n')}`
     : ''
@@ -163,10 +182,11 @@ async function sendToTelegram(pending, screenshotUrl) {
   }
 
   if (msgId) {
-    await supabase
-      .from('pending_tools')
-      .update({ telegram_msg_id: msgId })
-      .eq('id', pending.id)
+    await api(`/pending-submissions/${pending.id}`, {
+      method: 'PATCH',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({ telegramMsgId: msgId }),
+    })
   }
 }
 

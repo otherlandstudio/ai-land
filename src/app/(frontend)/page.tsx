@@ -4,7 +4,7 @@ import {
   getToolsCount,
   getCategoryCounts,
   getSearchSuggestions,
-} from '@/lib/supabase'
+} from '@/lib/tools'
 import HomeClient from './HomeClient'
 import ToolCardSkeleton from '@/components/tools/ToolCardSkeleton'
 

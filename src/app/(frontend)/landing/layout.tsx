@@ -1,7 +1,7 @@
 import localFont from 'next/font/local'
 
 const suisse = localFont({
-  src: '../../../public/fonts/SuisseIntl-Regular.otf',
+  src: '../../../../public/fonts/SuisseIntl-Regular.otf',
   weight: '400',
   style: 'normal',
   variable: '--cm-font',

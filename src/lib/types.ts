@@ -12,6 +12,7 @@ export interface Tool {
   website_url: string | null
   cover_color: string | null
   screenshot_url: string | null
+  content?: unknown | null
   published: boolean
   submitted_by_user: boolean
   created_at: string
@@ -39,6 +40,7 @@ export type Category =
   | 'Marketing'
   | 'Sales'
   | 'Hiring & HR'
+  | 'Finance'
 
 export const CATEGORIES: Category[] = [
   'Assistants',
@@ -51,4 +53,5 @@ export const CATEGORIES: Category[] = [
   'Marketing',
   'Sales',
   'Hiring & HR',
+  'Finance',
 ]

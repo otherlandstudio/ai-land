@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { Tool } from '@/lib/types'
 import { getCategoryColor, cleanDescription } from '@/lib/utils'
 import HelpMeModal from '@/components/tools/HelpMeModal'
@@ -24,6 +24,7 @@ interface Props {
   prevSlug: string | null
   nextSlug: string | null
   suggestions?: { id: string; text: string }[]
+  contentSlot?: ReactNode
 }
 
 const C = {
@@ -48,6 +49,7 @@ export default function ToolDetailClient({
   prevSlug,
   nextSlug,
   suggestions = [],
+  contentSlot = null,
 }: Props) {
   const [helpOpen, setHelpOpen] = useState(false)
   const color = getCategoryColor(tool.category)
@@ -250,6 +252,23 @@ export default function ToolDetailClient({
                     {uc}
                   </span>
                 ))}
+              </div>
+            )}
+
+            {/* Контент (rich text з CMS) — повний опис тула */}
+            {contentSlot && (
+              <div
+                className="tool-content"
+                style={{
+                  ...fontSans,
+                  color: C.textDim,
+                  fontSize: 16,
+                  lineHeight: '26px',
+                  marginTop: 32,
+                  maxWidth: 760,
+                }}
+              >
+                {contentSlot}
               </div>
             )}
           </article>

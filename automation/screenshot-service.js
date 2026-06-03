@@ -61,7 +61,13 @@ app.post('/screenshot', async (req, res) => {
     await page.route('**/accounts.google.com/gsi/**', route => route.abort())
     await page.route('**/gstatic.com/_/gsi/**', route => route.abort())
 
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 })
+    // domcontentloaded + вищий таймаут: важкі сайти з постійним мережевим трафіком
+    // (аналітика/реклама) ніколи не дають 'networkidle'. Прорисовку добирає waitForTimeout нижче.
+    try {
+      await page.goto(url, { waitUntil: 'networkidle', timeout: 20000 })
+    } catch {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 })
+    }
 
     // Fallback: hide any One Tap iframe that slipped past the network block,
     // plus the most common cookie-consent overlays that ruin marketing screenshots.

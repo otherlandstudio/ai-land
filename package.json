@@ -2,24 +2,36 @@
   "name": "ai-land",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "seed": "cross-env NODE_OPTIONS=--import=tsx/esm tsx scripts/seed.ts",
+    "backfill:screenshots": "cross-env NODE_OPTIONS=--import=tsx/esm tsx scripts/backfill-screenshots.ts"
   },
   "dependencies": {
+    "@payloadcms/db-postgres": "^3.85.0",
+    "@payloadcms/next": "^3.85.0",
+    "@payloadcms/richtext-lexical": "^3.85.0",
+    "@payloadcms/storage-s3": "^3.85.0",
     "@supabase/ssr": "^0.9.0",
     "@supabase/supabase-js": "^2.100.0",
-    "next": "16.2.1",
+    "next": "^16.2.7",
+    "payload": "^3.85.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

@@ -39,6 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# payload generated types (regenerated via `payload generate:types`; not imported)
+/src/payload-types.ts
+
 automation/node_modules
 automation/.env
 .playwright-mcp/
@@ -56,3 +60,7 @@ automation/.env
 /MIGRATION-LOG.md
 /.env.vercel-import
 /vercel-env-import.txt
+
+# operational dumps (one-off migration artifacts)
+/automation/backfill-report.json
+/automation/usecases-backup.json

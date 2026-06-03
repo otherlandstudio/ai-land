@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getTools } from '@/lib/supabase'
+import { getTools } from '@/lib/tools'
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q') ?? ''

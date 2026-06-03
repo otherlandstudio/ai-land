@@ -1,21 +1,31 @@
 // Pipeline 3: Telegram Bot — approve/reject tools via inline buttons
 // Usage: node bot.js
+//
+// Пише в Payload через REST API з API-key сервісного користувача.
+// Потрібні env: TELEGRAM_BOT_TOKEN, PAYLOAD_API_URL (напр. https://ailand.gallery
+// або http://localhost:3000), PAYLOAD_API_KEY.
 
 import 'dotenv/config'
 import { Telegraf } from 'telegraf'
-import { createClient } from '@supabase/supabase-js'
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
+
+const API = (process.env.PAYLOAD_API_URL || 'http://localhost:3000').replace(/\/$/, '')
+const AUTH = { Authorization: `users API-Key ${process.env.PAYLOAD_API_KEY}` }
+const JSON_HEADERS = { ...AUTH, 'Content-Type': 'application/json' }
+
+async function api(path, init = {}) {
+  const res = await fetch(`${API}/api${path}`, init)
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.errors?.[0]?.message || `HTTP ${res.status}`)
+  return data
+}
 
 async function publishTool(pendingId, ctx) {
-  const { data: pending, error } = await supabase
-    .from('pending_tools')
-    .select('*')
-    .eq('id', pendingId)
-    .single()
-
-  if (error || !pending) {
+  let pending
+  try {
+    pending = await api(`/pending-submissions/${pendingId}`, { headers: AUTH })
+  } catch {
     await ctx.answerCbQuery('Tool not found')
     return
   }
@@ -25,57 +35,64 @@ async function publishTool(pendingId, ctx) {
     return
   }
 
-  const toolData = pending.tool_data
+  const t = pending.toolData || {}
+  const useCases = Array.isArray(t.use_cases) ? t.use_cases.filter(Boolean).map((value) => ({ value })) : []
 
-  // Only the 6 displayed fields + search_description (internal, search-only).
-  // Deprecated columns (eli5, tags, price_*, cover_color) are nulled out — schema kept for back-compat.
-  const { error: insertError } = await supabase.from('tools').insert({
-    name: toolData.name,
-    slug: toolData.slug,
-    category: toolData.category,
-    description: toolData.description,
-    use_cases: toolData.use_cases ?? [],
-    website_url: toolData.website_url ?? null,
-    screenshot_url: toolData.screenshot_url ?? null,
-    search_description: toolData.search_description ?? null,
-    eli5: null,
-    tags: [],
-    price_type: null,
-    price_label: null,
-    cover_color: null,
-    published: true,
-    submitted_by_user: pending.source === 'user_submission',
-    published_at: new Date().toISOString(),
-  })
-
-  if (insertError) {
-    console.error('[bot] Insert error:', insertError.message)
+  try {
+    await api('/tools', {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({
+        _status: 'published',
+        name: t.name,
+        slug: t.slug,
+        category: t.category,
+        description: t.description ?? null,
+        useCases,
+        websiteUrl: t.website_url ?? null,
+        screenshotUrl: t.screenshot_url ?? null,
+        publishedAt: new Date().toISOString(),
+      }),
+    })
+  } catch (err) {
+    console.error('[bot] Publish error:', err.message)
     await ctx.answerCbQuery('Error publishing')
     return
   }
 
-  await supabase.from('pending_tools').update({ status: 'approved' }).eq('id', pendingId)
+  await api(`/pending-submissions/${pendingId}`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ status: 'approved' }),
+  })
 
   await ctx.editMessageReplyMarkup({ inline_keyboard: [[{ text: '✅ Published', callback_data: 'done' }]] })
-  await ctx.answerCbQuery(`✅ Published: ${toolData.name}`)
-  console.log(`[bot] Published: ${toolData.name}`)
+  await ctx.answerCbQuery(`✅ Published: ${t.name}`)
+  console.log(`[bot] Published: ${t.name}`)
 }
 
 async function rejectTool(pendingId, ctx) {
-  const { data: pending } = await supabase
-    .from('pending_tools')
-    .select('status, tool_data')
-    .eq('id', pendingId)
-    .single()
+  let pending
+  try {
+    pending = await api(`/pending-submissions/${pendingId}`, { headers: AUTH })
+  } catch {
+    await ctx.answerCbQuery('Not found')
+    return
+  }
+  if (pending.status !== 'pending_review') {
+    await ctx.answerCbQuery(`Already ${pending.status}`)
+    return
+  }
 
-  if (!pending) { await ctx.answerCbQuery('Not found'); return }
-  if (pending.status !== 'pending_review') { await ctx.answerCbQuery(`Already ${pending.status}`); return }
-
-  await supabase.from('pending_tools').update({ status: 'rejected' }).eq('id', pendingId)
+  await api(`/pending-submissions/${pendingId}`, {
+    method: 'PATCH',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ status: 'rejected' }),
+  })
 
   await ctx.editMessageReplyMarkup({ inline_keyboard: [[{ text: '❌ Rejected', callback_data: 'done' }]] })
-  await ctx.answerCbQuery(`❌ Rejected: ${pending.tool_data?.name}`)
-  console.log(`[bot] Rejected: ${pending.tool_data?.name}`)
+  await ctx.answerCbQuery(`❌ Rejected: ${pending.toolData?.name}`)
+  console.log(`[bot] Rejected: ${pending.toolData?.name}`)
 }
 
 // Inline button handlers
@@ -91,11 +108,12 @@ bot.action('done', (ctx) => ctx.answerCbQuery())
 
 // Health check command
 bot.command('status', async (ctx) => {
-  const { count } = await supabase
-    .from('pending_tools')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending_review')
-  await ctx.reply(`🤖 AI Land Bot running\n📋 Pending reviews: ${count ?? 0}`)
+  try {
+    const data = await api('/pending-submissions?where[status][equals]=pending_review&limit=1', { headers: AUTH })
+    await ctx.reply(`🤖 AI Land Bot running\n📋 Pending reviews: ${data.totalDocs ?? 0}`)
+  } catch (err) {
+    await ctx.reply(`🤖 Bot up, but API error: ${err.message}`)
+  }
 })
 
 bot.launch({

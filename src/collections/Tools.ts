@@ -1,0 +1,162 @@
+import type { CollectionConfig } from 'payload'
+import { revalidatePath } from 'next/cache'
+import { CATEGORIES } from '../lib/types'
+
+/**
+ * Tools — каталог AI-тулів. Максимально проста форма (Webflow-style):
+ *   ① Фото → ② Назва → ③ Короткий опис → ④ Сайт → ⑤ Контент (rich text) → ⑥ Сценарії
+ * Мета (категорія / slug / дата / canonical URL) — у сайдбарі.
+ *
+ * dbName: 'cms_tools' — окрема таблиця, не чіпає legacy `tools`.
+ */
+export const Tools: CollectionConfig = {
+  slug: 'tools',
+  dbName: 'cms_tools',
+  labels: { singular: 'Тул', plural: 'Тули' },
+  admin: {
+    useAsTitle: 'name',
+    defaultColumns: ['screenshotUpload', 'name', 'category', '_status'],
+    group: 'Каталог',
+  },
+  access: {
+    read: () => true,
+  },
+  versions: {
+    drafts: { autosave: false },
+    maxPerDoc: 10,
+  },
+  fields: [
+    // ① Фото
+    {
+      name: 'screenshotUpload',
+      label: 'Фото',
+      type: 'upload',
+      relationTo: 'media',
+      admin: { description: 'Головне зображення тула. Завантаж або заміни — воно одразу на сайті.' },
+    },
+    // ② Назва
+    { name: 'name', label: 'Назва', type: 'text', required: true },
+    // ③ Короткий опис
+    {
+      name: 'description',
+      label: 'Короткий опис',
+      type: 'textarea',
+      admin: { description: 'Одне-два речення для картки й прев’ю.' },
+    },
+    // ④ Сайт
+    { name: 'websiteUrl', label: 'Сайт', type: 'text', admin: { placeholder: 'https://' } },
+    // ⑤ Контент (rich text)
+    {
+      name: 'content',
+      label: 'Контент',
+      type: 'richText',
+      admin: { description: 'Повний опис тула — заголовки, списки, посилання. Як у Webflow.' },
+    },
+    // ⑥ Сценарії використання (пігулки)
+    {
+      name: 'useCases',
+      label: 'Сценарії використання',
+      type: 'text',
+      hasMany: true,
+      admin: { description: 'Додавай по одному, Enter — щоб підтвердити.' },
+    },
+
+    // ───── сайдбар (мета) ─────
+    {
+      name: 'category',
+      label: 'Категорія',
+      type: 'select',
+      options: CATEGORIES.map((c) => ({ label: c, value: c })),
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'slug',
+      label: 'Slug',
+      type: 'text',
+      unique: true,
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Авто з назви. /tools/<slug>. Не міняти після публікації.',
+      },
+    },
+    {
+      name: 'publishedAt',
+      label: 'Дата публікації',
+      type: 'date',
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'screenshotUrl',
+      label: 'URL скріншоту (авто)',
+      type: 'text',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Заповнюється автоматично з «Фото». Це поле читає сайт.',
+      },
+    },
+  ],
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        // Авто-slug із назви, якщо порожній.
+        if (data && !data.slug && data.name) {
+          data.slug = String(data.name)
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+        }
+        return data
+      },
+    ],
+    beforeChange: [
+      async ({ data, req, originalDoc }) => {
+        if (data?.screenshotUpload) {
+          try {
+            const media = await req.payload.findByID({
+              collection: 'media',
+              id: data.screenshotUpload,
+              depth: 0,
+            })
+            const url = (media as { url?: string })?.url
+            if (url) data.screenshotUrl = url
+          } catch {
+            /* лишаємо наявний screenshotUrl */
+          }
+        } else if (originalDoc?.screenshotUpload && data && 'screenshotUpload' in data) {
+          data.screenshotUrl = null
+        }
+        if (data?._status === 'published' && !data.publishedAt) {
+          data.publishedAt = new Date().toISOString()
+        }
+        return data
+      },
+    ],
+    afterChange: [
+      ({ doc, context }) => {
+        if (context?.disableRevalidate) return doc
+        try {
+          revalidatePath('/')
+          if (doc?.slug) revalidatePath(`/tools/${doc.slug}`)
+        } catch {
+          /* поза Next-request scope */
+        }
+        return doc
+      },
+    ],
+    afterDelete: [
+      ({ doc, context }) => {
+        if (context?.disableRevalidate) return doc
+        try {
+          revalidatePath('/')
+          if (doc?.slug) revalidatePath(`/tools/${doc.slug}`)
+        } catch {
+          /* поза Next-request scope */
+        }
+        return doc
+      },
+    ],
+  },
+}
