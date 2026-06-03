@@ -120,8 +120,15 @@ export const Tools: CollectionConfig = {
               id: data.screenshotUpload,
               depth: 0,
             })
-            const url = (media as { url?: string })?.url
-            if (url) data.screenshotUrl = url
+            const m = media as { url?: string; filename?: string }
+            const base = process.env.SUPABASE_URL
+            const bucket = process.env.S3_BUCKET
+            // Детерміновано будуємо публічний Supabase-URL (а не відносний /api/media).
+            if (m.filename && base && bucket) {
+              data.screenshotUrl = `${base}/storage/v1/object/public/${bucket}/${m.filename}`
+            } else if (m.url?.startsWith('http')) {
+              data.screenshotUrl = m.url
+            }
           } catch {
             /* лишаємо наявний screenshotUrl */
           }
