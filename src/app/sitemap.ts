@@ -1,7 +1,10 @@
 import type { MetadataRoute } from 'next'
 import { getAllPublishedSlugs } from '@/lib/tools'
 
-const BASE_URL = 'https://ai.land'
+// Генеруємо на запит (рантайм), не на білді — щоб білд не чіпав БД.
+export const dynamic = 'force-dynamic'
+
+const BASE_URL = 'https://www.ailand.gallery'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const slugs = await getAllPublishedSlugs()
