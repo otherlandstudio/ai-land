@@ -51,9 +51,12 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
-      // Supabase session-пулер обмежений (pool_size=15). Next білдить SSG у
-      // кількох воркерах, кожен зі своїм пулом → тримаємо макс. конектів низьким.
+      // Supabase пулери обмежені; тримаємо макс. конектів низьким на інстанс.
       max: Number(process.env.PG_POOL_MAX || 3),
+      // Supabase вимагає SSL (сертифікати пулера не валідуються стандартним CA).
+      ssl: /supabase\.com/.test(process.env.DATABASE_URL || '')
+        ? { rejectUnauthorized: false }
+        : undefined,
     },
     push: false, // прод-БД: керуємо схемою через міграції, не авто-push
   }),
