@@ -44,6 +44,8 @@ export default buildConfig({
   },
   collections: [Tools, PendingSubmissions, Media, Users],
   editor: lexicalEditor(),
+  // ТИМЧАСОВО: показувати справжні помилки в API-відповідях (діагностика аплоаду). ПРИБРАТИ.
+  debug: true,
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
