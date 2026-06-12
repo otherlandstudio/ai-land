@@ -149,11 +149,12 @@ function SubmitToolButton() {
 
 /* ============================================================== HERO
    Figma group 702:2257: AI Land logotype + "/ Curated library..." text inline,
-   28/32 SemiBold, AI Land in #fff, rest in #898989, container width ~650 → wraps 2 lines. */
+   28/32 SemiBold, AI Land in #fff, rest in #898989, container width ~650 → wraps 2 lines.
+   Below: email subscription pill — dark #323232 input + white mono CTA flush right. */
 
 function Hero({ totalCount: _totalCount }: { totalCount: number; hideTopWordmark?: boolean }) {
   return (
-    <section className="pt-5 pb-20 md:pb-[168px]">
+    <section className="pt-5 pb-16 md:pb-[104px]">
       <h1
         className="text-[19px] leading-[25px] md:text-[28px] md:leading-[32px]"
         style={{
@@ -171,7 +172,126 @@ function Hero({ totalCount: _totalCount }: { totalCount: number; hideTopWordmark
           Hand-picked and described in plain&nbsp;language.
         </span>
       </h1>
+
+      <SubscribeForm />
     </section>
+  )
+}
+
+/* ============================================================== SUBSCRIBE FORM */
+
+function SubscribeForm() {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [hover, setHover] = useState(false)
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    if (status === 'loading') return
+    setStatus('loading')
+    const hp = (new FormData(e.currentTarget as HTMLFormElement).get('hp') as string) || ''
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, hp }),
+      })
+      setStatus(res.ok ? 'success' : 'error')
+    } catch {
+      setStatus('error')
+    }
+  }
+
+  if (status === 'success') {
+    return (
+      <p className="mt-7" style={{ ...fontSans, fontSize: 15, color: '#ffffff' }}>
+        You&rsquo;re in. One email a month — see you in the next&nbsp;one.
+      </p>
+    )
+  }
+
+  const ctaStyle = {
+    ...fontMono,
+    borderRadius: 33,
+    background: hover ? '#e8e8e8' : '#ffffff',
+    color: '#141414',
+    fontSize: 14,
+    lineHeight: '20px',
+    letterSpacing: '0.11em',
+    textTransform: 'uppercase',
+    fontWeight: 400,
+    whiteSpace: 'nowrap',
+    cursor: 'pointer',
+    border: 'none',
+    transition: 'background-color 220ms cubic-bezier(0.4,0,0.2,1)',
+    opacity: status === 'loading' ? 0.6 : 1,
+  } as const
+
+  return (
+    <form onSubmit={submit} className="mt-7" style={{ maxWidth: 510 }}>
+      {/* Honeypot — невидиме поле для ботів */}
+      <input
+        type="text"
+        name="hp"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: 'absolute', left: -9999, width: 1, height: 1, opacity: 0 }}
+      />
+
+      <div
+        className="flex items-center"
+        style={{ background: '#323232', borderRadius: 33, height: 46, paddingLeft: 22 }}
+      >
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email address"
+          aria-label="Email address"
+          className="min-w-0 flex-1 placeholder-[#a4a4a4]"
+          style={{
+            ...fontSans,
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            color: '#ffffff',
+            fontSize: 15,
+            paddingRight: 12,
+          }}
+        />
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          className="hidden h-full items-center md:inline-flex"
+          style={{ ...ctaStyle, paddingLeft: 22, paddingRight: 24 }}
+        >
+          Get monthly top picks&nbsp;↗
+        </button>
+      </div>
+
+      {/* Мобайл: CTA окремим рядком на всю ширину */}
+      <button
+        type="submit"
+        disabled={status === 'loading'}
+        className="mt-2 inline-flex w-full items-center justify-center md:hidden"
+        style={{ ...ctaStyle, height: 46 }}
+      >
+        Get monthly top picks&nbsp;↗
+      </button>
+
+      <p
+        className="mt-3"
+        style={{ ...fontSans, fontSize: 13, color: status === 'error' ? '#ff6b6b' : '#898989' }}
+      >
+        {status === 'error'
+          ? 'Something went wrong — try again.'
+          : 'One curated email per month. That’s it.'}
+      </p>
+    </form>
   )
 }
 

@@ -1,6 +1,7 @@
 import * as migration_20260603_124733_initial from './20260603_124733_initial';
 import * as migration_20260603_125735_add_finance_category from './20260603_125735_add_finance_category';
 import * as migration_20260603_152305_simplify_tools from './20260603_152305_simplify_tools';
+import * as migration_20260611_100101_add_subscribers from './20260611_100101_add_subscribers';
 
 export const migrations = [
   {
@@ -16,6 +17,11 @@ export const migrations = [
   {
     up: migration_20260603_152305_simplify_tools.up,
     down: migration_20260603_152305_simplify_tools.down,
-    name: '20260603_152305_simplify_tools'
+    name: '20260603_152305_simplify_tools',
+  },
+  {
+    up: migration_20260611_100101_add_subscribers.up,
+    down: migration_20260611_100101_add_subscribers.down,
+    name: '20260611_100101_add_subscribers'
   },
 ];
