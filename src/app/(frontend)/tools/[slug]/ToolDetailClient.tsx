@@ -145,7 +145,7 @@ export default function ToolDetailClient({
                   src={tool.screenshot_url}
                   alt={tool.name}
                   fill
-                  sizes="(max-width: 1024px) 100vw, 1280px"
+                  sizes="(max-width: 1024px) 100vw, 904px"
                   className="object-cover object-top"
                   placeholder="blur"
                   blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAIAAAA7ljmRAAAAGElEQVR4nGNkYGBgZGD4z8DAwMDAwMAAAA0ABS0ucYTfAAAAAElFTkSuQmCC"
