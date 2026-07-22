@@ -410,6 +410,7 @@ function VisitWebsiteButton({ href }: { href: string }) {
   return (
     <a
       href={href}
+      target="_blank"
       rel="noopener noreferrer"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
