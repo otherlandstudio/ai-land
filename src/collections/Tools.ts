@@ -1,6 +1,51 @@
 import type { CollectionConfig } from 'payload'
+import type { PayloadRequest } from 'payload'
 import { revalidatePath } from 'next/cache'
 import { CATEGORIES } from '../lib/types'
+
+/**
+ * Якщо тул має ЗОВНІШНІЙ screenshotUrl (microlink тощо) і немає завантаженого «Фото» —
+ * качаємо байти й кладемо в Supabase Media, щоб сайт віддавав НАШ кешований файл,
+ * а не генерований наживо microlink. Так усе з Telegram-бота одразу лягає в Supabase.
+ *
+ * Ставить лише data.screenshotUpload — далі наявний beforeChange будує Supabase-URL.
+ * Не кидає помилок: якщо microlink віддав 429/сміття — лишаємо як є (self-healing
+ * при наступному збереженні). Працює в serverless — браузер не потрібен, лише fetch.
+ */
+async function ensureStoredScreenshot(
+  data: Record<string, unknown>,
+  req: PayloadRequest,
+  originalDoc?: { slug?: string } | null,
+): Promise<void> {
+  if (data.screenshotUpload) return // вже є завантажене фото
+  const url = data.screenshotUrl
+  if (typeof url !== 'string' || !url) return
+  if (url.includes('/storage/v1/object/public/')) return // вже наш Supabase-файл
+
+  try {
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), 30_000)
+    const res = await fetch(url, { signal: ctrl.signal, redirect: 'follow' })
+    clearTimeout(timer)
+    if (!res.ok) return
+
+    const mimetype = (res.headers.get('content-type') || '').split(';')[0].trim()
+    if (!mimetype.startsWith('image/')) return
+    const buffer = Buffer.from(await res.arrayBuffer())
+    if (buffer.length < 5 * 1024) return // заглушка/Cloudflare-challenge — лишаємо як є
+
+    const ext = mimetype === 'image/jpeg' ? 'jpg' : mimetype === 'image/webp' ? 'webp' : 'png'
+    const slug = (data.slug as string) || originalDoc?.slug || 'tool'
+    const media = await req.payload.create({
+      collection: 'media',
+      data: { alt: (data.name as string) || slug },
+      file: { data: buffer, mimetype, name: `${slug}.${ext}`, size: buffer.length },
+    })
+    data.screenshotUpload = media.id // наявний beforeChange нижче збудує screenshotUrl
+  } catch {
+    /* мережа / rate-limit → лишаємо наявний screenshotUrl */
+  }
+}
 
 /**
  * Tools — каталог AI-тулів. Максимально проста форма (Webflow-style):
@@ -112,6 +157,12 @@ export const Tools: CollectionConfig = {
       },
     ],
     beforeChange: [
+      // ① Зовнішній screenshotUrl (microlink) → завантажити в Supabase Media.
+      async ({ data, req, originalDoc }) => {
+        if (data) await ensureStoredScreenshot(data, req, originalDoc)
+        return data
+      },
+      // ② Із завантаженого «Фото» будуємо детермінований публічний Supabase-URL.
       async ({ data, req, originalDoc }) => {
         if (data?.screenshotUpload) {
           try {

@@ -3,6 +3,10 @@ import { withPayload } from "@payloadcms/next/withPayload";
 
 const nextConfig: NextConfig = {
   images: {
+    // Скріншоти майже не змінюються, а Supabase Storage віддає `no-cache`,
+    // через що браузер перезавантажував кожну картинку при кожному переході.
+    // Кешуємо оптимізовані зображення на 31 день (і на сервері, і в браузері).
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       {
         protocol: 'https',

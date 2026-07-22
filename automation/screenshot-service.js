@@ -124,6 +124,7 @@ app.post('/screenshot', async (req, res) => {
       .from(BUCKET)
       .upload(storagePath, buffer, {
         contentType: 'image/png',
+        cacheControl: '2678400', // 31 день — щоб браузер/edge кешували скрін одразу
         upsert: true,
       })
 
