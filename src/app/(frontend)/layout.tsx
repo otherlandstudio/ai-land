@@ -28,13 +28,13 @@ const mono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ailand.gallery'),
+  metadataBase: new URL('https://www.ailand.gallery'),
   title: 'AI Land — Curated library of AI tools',
   description: 'A hand-picked collection of AI tools that actually work. Discover, compare and find the right tool for your workflow — described in plain language.',
   openGraph: {
     title: 'AI Land — Curated library of AI tools',
     description: 'Hand-picked AI tools that actually work, described in plain language.',
-    url: 'https://ailand.gallery',
+    url: 'https://www.ailand.gallery',
     siteName: 'AI Land',
     type: 'website',
     locale: 'en_US',
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   alternates: {
-    canonical: 'https://ailand.gallery',
+    canonical: 'https://www.ailand.gallery',
   },
 }
 
