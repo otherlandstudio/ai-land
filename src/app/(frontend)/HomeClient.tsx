@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { CATEGORIES } from '@/lib/types'
+import { categorySlug, CATEGORY_SEO } from '@/lib/categories'
 import { getCategoryColor, cleanDescription } from '@/lib/utils'
 import type { Tool } from '@/lib/types'
 import FloatingSearch from '@/components/tools/FloatingSearch'
@@ -14,6 +15,8 @@ import { AppTransitionProvider, useAppTransition } from '@/lib/transition'
 interface HomeClientProps {
   tools: Tool[]
   category?: string
+  /** Активна категорія на dedicated-сторінці /[category] — підсвічує таб і задає H1. */
+  activeCategory?: string
   query?: string
   totalCount?: number
   /** Count of tools matching current category+query — used to compute pagination */
@@ -51,6 +54,7 @@ export default function HomeClient(props: HomeClientProps) {
 function HomeClientInner({
   tools,
   category,
+  activeCategory,
   query,
   totalCount = 0,
   filteredCount,
@@ -76,9 +80,9 @@ function HomeClientInner({
       </div>
 
       <main className="mx-auto px-4 sm:px-6 lg:px-10" style={{ maxWidth: 1440 }}>
-        <Hero totalCount={totalCount} />
+        <Hero totalCount={totalCount} category={activeCategory} />
 
-        <CategoryTabs counts={categoryCounts} />
+        <CategoryTabs counts={categoryCounts} activeCategory={activeCategory} />
 
         {query && (
           <ResultsHeader query={query} category={category} count={tools.length} />
@@ -152,7 +156,16 @@ function SubmitToolButton() {
    28/32 SemiBold, AI Land in #fff, rest in #898989, container width ~650 → wraps 2 lines.
    Below: email subscription pill — dark #323232 input + white mono CTA flush right. */
 
-function Hero({ totalCount: _totalCount }: { totalCount: number; hideTopWordmark?: boolean }) {
+function Hero({
+  totalCount: _totalCount,
+  category,
+}: {
+  totalCount: number
+  hideTopWordmark?: boolean
+  category?: string
+}) {
+  const seo = category ? CATEGORY_SEO[category as keyof typeof CATEGORY_SEO] : null
+
   return (
     <section className="pt-5 pb-16 md:pb-[104px]">
       <h1
@@ -165,12 +178,27 @@ function Hero({ totalCount: _totalCount }: { totalCount: number; hideTopWordmark
           textWrap: 'balance',
         }}
       >
-        <Link href="/" style={{ color: '#ffffff' }}>AI&nbsp;Land</Link>
-        <span style={{ color: '#898989' }}>
-          {' '}/ Curated library of AI&nbsp;tools.
-          <br />
-          Hand-picked and described in plain&nbsp;language.
-        </span>
+        {seo ? (
+          <>
+            <Link href="/" style={{ color: '#898989' }}>AI&nbsp;Land</Link>
+            <span style={{ color: '#ffffff' }}>
+              {' '}/ {seo.heading}.
+            </span>
+            <span style={{ color: '#898989' }}>
+              <br />
+              {seo.intro}
+            </span>
+          </>
+        ) : (
+          <>
+            <Link href="/" style={{ color: '#ffffff' }}>AI&nbsp;Land</Link>
+            <span style={{ color: '#898989' }}>
+              {' '}/ Curated library of AI&nbsp;tools.
+              <br />
+              Hand-picked and described in plain&nbsp;language.
+            </span>
+          </>
+        )}
       </h1>
 
       <SubscribeForm />
@@ -297,35 +325,31 @@ function SubscribeForm() {
 
 /* ============================================================== CATEGORY TABS */
 
-function CategoryTabs({ counts }: { counts: Record<string, number> }) {
-  const router = useRouter()
-  const pathname = usePathname()
+function CategoryTabs({
+  counts,
+  activeCategory,
+}: {
+  counts: Record<string, number>
+  activeCategory?: string
+}) {
   const searchParams = useSearchParams()
-  const { startTransition } = useAppTransition()
-  const active = searchParams.get('category') ?? ''
-
-  function select(cat: string) {
-    const params = new URLSearchParams(searchParams.toString())
-    if (cat === active) params.delete('category')
-    else params.set('category', cat)
-    params.delete('page')
-    startTransition(() => router.push(`${pathname}?${params.toString()}`, { scroll: false }))
-  }
+  // Активна категорія: dedicated-сторінка /[category] (проп) або ?category= на головній.
+  const active = activeCategory ?? searchParams.get('category') ?? ''
 
   return (
     <div
       className="flex flex-nowrap items-center overflow-x-auto no-scrollbar"
       style={{ gap: 28, paddingBottom: 4 }}
     >
-      <CategoryTab name="All" active={active === ''} onClick={() => select('')} />
+      <CategoryTab name="All" href="/" active={active === ''} />
       {CATEGORIES.map((cat) => (
         <CategoryTab
           key={cat}
           name={cat}
+          href={`/${categorySlug(cat)}`}
           color={getCategoryColor(cat)}
           count={counts[cat]}
           active={active === cat}
-          onClick={() => select(cat)}
         />
       ))}
     </div>
@@ -334,21 +358,21 @@ function CategoryTabs({ counts }: { counts: Record<string, number> }) {
 
 function CategoryTab({
   name,
+  href,
   color,
   count,
   active,
-  onClick,
 }: {
   name: string
+  href: string
   color?: string
   count?: number
   active?: boolean
-  onClick: () => void
 }) {
   const [hover, setHover] = useState(false)
   return (
-    <button
-      onClick={onClick}
+    <Link
+      href={href}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       className="inline-flex shrink-0 items-center whitespace-nowrap"
@@ -384,7 +408,7 @@ function CategoryTab({
           {count}
         </span>
       )}
-    </button>
+    </Link>
   )
 }
 

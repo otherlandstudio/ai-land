@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import type { PayloadRequest } from 'payload'
 import { revalidatePath } from 'next/cache'
 import { CATEGORIES } from '../lib/types'
+import { categorySlug } from '../lib/categories'
 
 /**
  * Якщо тул має ЗОВНІШНІЙ screenshotUrl (microlink тощо) і немає завантаженого «Фото» —
@@ -198,6 +199,9 @@ export const Tools: CollectionConfig = {
         try {
           revalidatePath('/')
           if (doc?.slug) revalidatePath(`/tools/${doc.slug}`)
+          // Новий/змінений тул → оновити його категорійну сторінку та sitemap.
+          if (doc?.category) revalidatePath(`/${categorySlug(doc.category)}`)
+          revalidatePath('/sitemap.xml')
         } catch {
           /* поза Next-request scope */
         }
